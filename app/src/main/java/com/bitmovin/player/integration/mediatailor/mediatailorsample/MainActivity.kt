@@ -7,10 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import com.bitmovin.player.api.Player
+import com.bitmovin.player.api.source.SourceConfig
+import com.bitmovin.player.integration.mediatailor.mediatailorsample.ui.PlayerView
 import com.bitmovin.player.integration.mediatailor.mediatailorsample.ui.theme.MediaTailorSampleTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,28 +23,23 @@ class MainActivity : ComponentActivity() {
         setContent {
             MediaTailorSampleTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                    val context = LocalContext.current
+                    val player = remember { Player(context) }
+
+                    DisposableEffect(player) {
+                        player.load(SourceConfig.fromUrl("https://cdn.bitmovin.com/content/assets/sintel/sintel.mpd"))
+
+                        onDispose {
+                            player.destroy()
+                        }
+                    }
+
+                    PlayerView(
+                        Modifier.padding(innerPadding),
+                        player
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MediaTailorSampleTheme {
-        Greeting("Android")
     }
 }

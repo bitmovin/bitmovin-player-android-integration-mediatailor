@@ -10,8 +10,10 @@ activityCompose = "1.10.1"
 composeBom = "2024.09.00"
 appcompat = "1.7.0"
 material = "1.10.0"
+player = "3.108.0"
 
 [libraries]
+bitmovin-player = { module = "com.bitmovin.player:player", version.ref = "player" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

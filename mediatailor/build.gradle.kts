@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+    compileOnly(libs.bitmovin.player)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
