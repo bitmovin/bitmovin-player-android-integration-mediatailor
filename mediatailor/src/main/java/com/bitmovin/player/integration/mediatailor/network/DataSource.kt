@@ -1,34 +1,37 @@
 package com.bitmovin.player.integration.mediatailor.network
 
-import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingSession
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.serializer
 
 internal interface DataSource {
     suspend fun post(): String?
+    suspend fun get(): String?
 }
 
 internal class DefaultDataSource(
     private val url: String
 ) : DataSource {
-    override suspend fun post(): String? = withContext(Dispatchers.IO) {
+    override suspend fun get(): String? = request(requestMethod = "GET")
+
+    override suspend fun post(): String? = request(requestMethod = "POST")
+
+    private suspend fun request(
+        requestMethod: String
+    ): String? = withContext(Dispatchers.IO) {
         var result: String?
         var urlConnection: HttpURLConnection? = null
 
         try {
             urlConnection = URL(url).openConnection() as HttpURLConnection
-            urlConnection.requestMethod = "POST"
+            urlConnection.requestMethod = requestMethod
 
             val responseCode = urlConnection.responseCode
             result = if (responseCode.isSuccessfulHttpResponse()) {

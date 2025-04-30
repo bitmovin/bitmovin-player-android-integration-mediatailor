@@ -13,12 +13,16 @@ internal interface MediaTailorSessionInitInitializer {
     suspend fun initialize(
         sessionConfig: MediaTailorSessionConfig.Explicit
     ): MediaTailorTrackingSession
+
+    suspend fun refresh(trackingUrl: String): MediaTailorTrackingSession
 }
 
 internal class DefaultMediaTailorSessionInitInitializer(
     private val dataSourceFactory: DataSourceFactory,
 ) : MediaTailorSessionInitInitializer {
-    private val json = Json
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
 
     override suspend fun prepareImplicitSession(
         sessionConfig: MediaTailorSessionConfig.Implicit
@@ -34,11 +38,20 @@ internal class DefaultMediaTailorSessionInitInitializer(
     override suspend fun initialize(
         sessionConfig: MediaTailorSessionConfig.Explicit
     ): MediaTailorTrackingSession {
-        val response = dataSourceFactory.create(sessionConfig.trackingUrl).post()
+        val response = dataSourceFactory.create(sessionConfig.trackingUrl).get()
         return if (response != null) {
             json.decodeFromString<MediaTailorTrackingSession>(response)
         } else {
             throw IllegalStateException("Failed to initialize MediaTailor session")
+        }
+    }
+
+    override suspend fun refresh(trackingUrl: String): MediaTailorTrackingSession {
+        val response = dataSourceFactory.create(trackingUrl).get()
+        return if (response != null) {
+            json.decodeFromString<MediaTailorTrackingSession>(response)
+        } else {
+            throw IllegalStateException("Failed to refresh MediaTailor session")
         }
     }
 }

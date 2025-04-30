@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.source.SourceConfig
 import com.bitmovin.player.integration.mediatailor.MediaTailorPlayer
+import com.bitmovin.player.integration.mediatailor.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.mediatailorsample.ui.PlayerView
 import com.bitmovin.player.integration.mediatailor.mediatailorsample.ui.theme.MediaTailorSampleTheme
 
@@ -28,7 +29,8 @@ class MainActivity : ComponentActivity() {
                     val player = remember { MediaTailorPlayer(Player(context)) }
 
                     DisposableEffect(player) {
-                        player.load(SourceConfig.fromUrl("https://cdn.bitmovin.com/content/assets/sintel/sintel.mpd"))
+                        //player.load(SourceConfig.fromUrl("https://cdn.bitmovin.com/content/assets/sintel/sintel.mpd"))
+                        player.load(MediaTailorSessionConfig.Implicit(sessionInitUrl = "https://awslive.streamco.video/v1/session/86dfd1144b3bf786fc967f2c3876972e5548ca5d/awslive/out/v1/live/jdub-live-bitmovin01/cmaf-cbcs/hls.m3u8"))
 
                         onDispose {
                             player.destroy()
