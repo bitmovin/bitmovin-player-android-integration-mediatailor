@@ -1,9 +1,9 @@
-package com.bitmovin.player.integration.mediatailor
+package com.bitmovin.player.integration.mediatailor.model
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MediaTailorSessionTrackingResponse(
+data class MediaTailorTrackingSession(
     val avails: List<Avail>
 )
 
@@ -36,4 +36,10 @@ data class TrackingEvent(
     val eventType: String,
     val startTime: String,
     val startTimeInSeconds: Double
+)
+
+@Serializable
+data class ImplicitSessionStartResponse(
+    val manifestUrl: String,
+    val trackingUrl: String
 )

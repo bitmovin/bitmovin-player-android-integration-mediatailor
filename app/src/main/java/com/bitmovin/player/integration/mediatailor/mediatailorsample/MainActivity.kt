@@ -13,9 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.source.SourceConfig
-import com.bitmovin.player.integration.mediatailor.MediaTailorAssetType
 import com.bitmovin.player.integration.mediatailor.MediaTailorPlayer
-import com.bitmovin.player.integration.mediatailor.MediaTailorSourceConfig
 import com.bitmovin.player.integration.mediatailor.mediatailorsample.ui.PlayerView
 import com.bitmovin.player.integration.mediatailor.mediatailorsample.ui.theme.MediaTailorSampleTheme
 
