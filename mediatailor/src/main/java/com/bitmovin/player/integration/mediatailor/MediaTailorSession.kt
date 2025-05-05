@@ -3,8 +3,9 @@ package com.bitmovin.player.integration.mediatailor
 import android.util.Log
 import com.bitmovin.player.integration.mediatailor.model.ImplicitSessionStartResponse
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
-import com.bitmovin.player.integration.mediatailor.network.DataSourceFactory
-import com.bitmovin.player.integration.mediatailor.network.DefaultDataSourceFactory
+import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
+import com.bitmovin.player.integration.mediatailor.network.HttpClient
+import com.bitmovin.player.integration.mediatailor.network.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -23,7 +24,7 @@ internal interface MediaTailorSession {
 }
 
 internal class DefaultMediaTailorSession(
-    private val dataSourceFactory: DataSourceFactory = DefaultDataSourceFactory(),
+    private val httpClient: HttpClient = DefaultHttpClient(),
 ) : MediaTailorSession, Disposable {
     private val json = Json {
         ignoreUnknownKeys = true
@@ -45,7 +46,7 @@ internal class DefaultMediaTailorSession(
                 response?.let {
                     Log.d(TAG, "Tracking Response: $it")
                     val adBreaks = it.avails.map {
-                        it.startTime
+                        it.availId to (it.startTimeInSeconds to it.startTimeInSeconds + it.durationInSeconds)
                     }
                     Log.d(TAG, "Ad Breaks: $adBreaks")
                 }
@@ -93,9 +94,9 @@ internal class DefaultMediaTailorSession(
     private suspend fun prepareImplicitSession(
         sessionConfig: MediaTailorSessionConfig.Implicit
     ): ImplicitSessionStartResponse {
-        val response = dataSourceFactory.create(sessionConfig.sessionInitUrl).post()
-        return if (response != null) {
-            json.decodeFromString<ImplicitSessionStartResponse>(response)
+        val response = httpClient.post(sessionConfig.sessionInitUrl)
+        return if (response.isSuccess) {
+            json.decodeFromString<ImplicitSessionStartResponse>(response.body!!)
         } else {
             throw IllegalStateException("Failed to initialize MediaTailor session")
         }
@@ -104,18 +105,18 @@ internal class DefaultMediaTailorSession(
     private suspend fun initialize(
         sessionConfig: MediaTailorSessionConfig.Explicit
     ): MediaTailorTrackingResponse {
-        val response = dataSourceFactory.create(sessionConfig.trackingUrl).get()
-        return if (response != null) {
-            json.decodeFromString<MediaTailorTrackingResponse>(response)
+        val response = httpClient.get(sessionConfig.trackingUrl)
+        return if (response.isSuccess) {
+            json.decodeFromString<MediaTailorTrackingResponse>(response.body!!)
         } else {
             throw IllegalStateException("Failed to initialize MediaTailor session")
         }
     }
 
     private suspend fun refresh(trackingUrl: String): MediaTailorTrackingResponse {
-        val response = dataSourceFactory.create(trackingUrl).get()
-        return if (response != null) {
-            json.decodeFromString<MediaTailorTrackingResponse>(response)
+        val response = httpClient.get(trackingUrl)
+        return if (response.isSuccess) {
+            json.decodeFromString<MediaTailorTrackingResponse>(response.body!!)
         } else {
             throw IllegalStateException("Failed to refresh MediaTailor session")
         }

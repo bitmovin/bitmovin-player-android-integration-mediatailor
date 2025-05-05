@@ -11,40 +11,40 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.coroutines.cancellation.CancellationException
 
-internal interface DataSource {
-    suspend fun post(): String?
-    suspend fun get(): String?
+internal interface HttpClient {
+    suspend fun get(url: String): HttpRequestResult
+    suspend fun post(url: String): HttpRequestResult
 }
 
-internal class DefaultDataSource(
-    private val url: String
-) : DataSource {
-    override suspend fun get(): String? = request(requestMethod = "GET")
+internal class DefaultHttpClient : HttpClient {
+    override suspend fun get(url: String): HttpRequestResult = request(url) { urlConnection ->
+        urlConnection.requestMethod = "GET"
+    }
 
-    override suspend fun post(): String? = request(requestMethod = "POST")
+    override suspend fun post(url: String): HttpRequestResult = request(url) { urlConnection ->
+        urlConnection.requestMethod = "POST"
+    }
 
     private suspend fun request(
-        requestMethod: String
-    ): String? = withContext(Dispatchers.IO) {
-        var result: String?
+        url: String,
+        configureHttpURLConnection: (HttpURLConnection) -> Unit,
+    ): HttpRequestResult = withContext(Dispatchers.IO) {
         var urlConnection: HttpURLConnection? = null
 
         try {
             urlConnection = URL(url).openConnection() as HttpURLConnection
-            urlConnection.requestMethod = requestMethod
+            configureHttpURLConnection(urlConnection)
 
-            val responseCode = urlConnection.responseCode
-            result = if (responseCode.isSuccessfulHttpResponse()) {
-                urlConnection.inputStream.readUtf8String()
+            if (urlConnection.responseCode.isSuccessfulHttpResponse()) {
+                HttpRequestResult.Success(body = urlConnection.inputStream.readUtf8String())
             } else {
-                null
+                HttpRequestResult.Failure(body = urlConnection.errorStream?.readUtf8String())
             }
         } catch (exception: IOException) {
-            result = null
+            HttpRequestResult.Failure(exception = exception)
         } finally {
             urlConnection?.disconnect()
         }
-        return@withContext result
     }
 }
 
