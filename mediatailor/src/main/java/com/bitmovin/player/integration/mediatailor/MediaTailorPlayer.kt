@@ -17,11 +17,16 @@ class MediaTailorPlayer(
 
     fun load(mediaTailorSourceConfig: MediaTailorSourceConfig) {
         scope.launch {
-            val result = mediaTailorSession.initialize(mediaTailorSourceConfig.mediaTailorSessionConfig)
-            val manifestUrl = result.getOrNull() ?: TODO("Failed to load session")
-            val sourceConfig = mediaTailorSourceConfig.toSourceConfig(manifestUrl)
-
-            player.load(sourceConfig)
+            val result = mediaTailorSession.initialize(mediaTailorSourceConfig)
+            result.fold(
+                onSuccess = {
+                    Log.d("MediaTailorPlayer", "Session initialized successfully")
+                    player.load(it)
+                },
+                onFailure = {
+                    Log.e("MediaTailorPlayer", "Failed to initialize session: ${it.message}")
+                }
+            )
         }
         player.on<PlayerEvent.TimeChanged> {
             Log.d("MediaTailorPlayer", "Time changed: ${it.time}")
@@ -29,6 +34,7 @@ class MediaTailorPlayer(
     }
 
     override fun destroy() {
+        mediaTailorSession.dispose()
         scope.cancel()
         player.destroy()
     }

@@ -1,6 +1,7 @@
 package com.bitmovin.player.integration.mediatailor
 
 import android.util.Log
+import com.bitmovin.player.api.source.SourceConfig
 import com.bitmovin.player.integration.mediatailor.model.ImplicitSessionStartResponse
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
@@ -8,6 +9,7 @@ import com.bitmovin.player.integration.mediatailor.network.HttpClient
 import com.bitmovin.player.integration.mediatailor.network.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,20 +20,20 @@ import java.net.URI
 
 private const val TAG = "MediaTailorSession"
 
-internal interface MediaTailorSession {
-    suspend fun initialize(sessionConfig: MediaTailorSessionConfig): Result<String>
-    suspend fun refresh()
+internal interface MediaTailorSession : Disposable {
+    suspend fun initialize(mediaTailorSourceConfig: MediaTailorSourceConfig): Result<SourceConfig>
 }
 
 internal class DefaultMediaTailorSession(
     private val httpClient: HttpClient = DefaultHttpClient(),
-) : MediaTailorSession, Disposable {
+) : MediaTailorSession {
     private val json = Json {
         ignoreUnknownKeys = true
     }
     private val _trackingUrl = MutableStateFlow<String?>(null)
     private val _trackingResponse = MutableStateFlow<MediaTailorTrackingResponse?>(null)
     private val mainScope = CoroutineScope(Dispatchers.Main)
+    private var refreshTrackingResponseJob: Job? = null
 
     init {
         mainScope.launch {
@@ -52,43 +54,56 @@ internal class DefaultMediaTailorSession(
                 }
             }
         }
-        mainScope.launch {
-            while (isActive) {
-                refresh()
-                // Web integration makes a request for every segment playback event. Android doesn't have that.
-                delay(4_000)
-            }
-        }
     }
 
-    override suspend fun initialize(sessionConfig: MediaTailorSessionConfig): Result<String> {
-        when (sessionConfig) {
+    override suspend fun initialize(
+        mediaTailorSourceConfig: MediaTailorSourceConfig
+    ): Result<SourceConfig> {
+        val result = when (val sessionConfig = mediaTailorSourceConfig.mediaTailorSessionConfig) {
             is MediaTailorSessionConfig.Implicit -> {
                 val response = prepareImplicitSession(sessionConfig)
                 val baseUri = URI(sessionConfig.sessionInitUrl)
                 val manifestUrl = baseUri.resolve(response.manifestUrl).toString()
                 _trackingUrl.value = baseUri.resolve(response.trackingUrl).toString()
-                _trackingResponse.value = initialize(
+                _trackingResponse.value = initializeSession(
                     MediaTailorSessionConfig.Explicit(
                         manifestUrl = manifestUrl,
                         trackingUrl = _trackingUrl.value!!,
                         assetType = sessionConfig.assetType
                     )
                 )
-                return Result.success(manifestUrl)
+
+                Result.success(mediaTailorSourceConfig.toSourceConfig(manifestUrl))
             }
 
             is MediaTailorSessionConfig.Explicit -> {
-                _trackingResponse.value = initialize(sessionConfig)
+                _trackingResponse.value = initializeSession(sessionConfig)
                 _trackingUrl.value = sessionConfig.trackingUrl
-                return Result.success(sessionConfig.manifestUrl)
+
+                Result.success(
+                    mediaTailorSourceConfig.toSourceConfig(
+                        sessionConfig.manifestUrl
+                    )
+                )
             }
         }
+
+        if (mediaTailorSourceConfig.mediaTailorSessionConfig.assetType == MediaTailorAssetType.Linear) {
+            refreshTrackingResponseJob = mainScope.launch {
+                while (isActive) {
+                    refreshTrackingResponse()
+                    // Web integration makes a request for every segment playback event. Android doesn't have that.
+                    delay(4_000)
+                }
+            }
+        }
+
+        return result
     }
 
-    override suspend fun refresh() {
+    private suspend fun refreshTrackingResponse() {
         val trackingUrl = _trackingUrl.value ?: return
-        val response = refresh(trackingUrl)
+        val response = refreshTrackingResponse(trackingUrl)
         _trackingResponse.value = response
     }
 
@@ -103,7 +118,7 @@ internal class DefaultMediaTailorSession(
         }
     }
 
-    private suspend fun initialize(
+    private suspend fun initializeSession(
         sessionConfig: MediaTailorSessionConfig.Explicit
     ): MediaTailorTrackingResponse {
         val response = httpClient.get(sessionConfig.trackingUrl)
@@ -114,7 +129,7 @@ internal class DefaultMediaTailorSession(
         }
     }
 
-    private suspend fun refresh(trackingUrl: String): MediaTailorTrackingResponse {
+    private suspend fun refreshTrackingResponse(trackingUrl: String): MediaTailorTrackingResponse {
         val response = httpClient.get(trackingUrl)
         return if (response.isSuccess) {
             json.decodeFromString<MediaTailorTrackingResponse>(response.body!!)
@@ -124,6 +139,7 @@ internal class DefaultMediaTailorSession(
     }
 
     override fun dispose() {
+        refreshTrackingResponseJob?.cancel()
         mainScope.cancel()
     }
 }
