@@ -1,15 +1,13 @@
 package com.bitmovin.player.integration.mediatailor
 
-import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingSession
-import com.bitmovin.player.integration.mediatailor.network.DataSource
-import com.bitmovin.player.integration.mediatailor.network.DataSourceFactory
+import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
 import kotlinx.serialization.json.Json
 import org.junit.Test
 
 class MediaTailorSessionTrackingResponseTest {
     @Test
     fun `parses sample MediaTailor session tracking response`() {
-        val response = Json.decodeFromString<MediaTailorTrackingSession>(
+        val response = Json.decodeFromString<MediaTailorTrackingResponse>(
             sampleMediaTailorTrackingResponse
         )
 
