@@ -72,6 +72,7 @@ internal class DefaultMediaTailorSession(
                     MediaTailorSessionConfig.Explicit(
                         manifestUrl = manifestUrl,
                         trackingUrl = _trackingUrl.value!!,
+                        assetType = sessionConfig.assetType
                     )
                 )
                 return Result.success(manifestUrl)
@@ -125,15 +126,4 @@ internal class DefaultMediaTailorSession(
     override fun dispose() {
         mainScope.cancel()
     }
-}
-
-sealed class MediaTailorSessionConfig {
-    data class Implicit(
-        val sessionInitUrl: String,
-    ) : MediaTailorSessionConfig()
-
-    data class Explicit(
-        val manifestUrl: String,
-        val trackingUrl: String,
-    ) : MediaTailorSessionConfig()
 }

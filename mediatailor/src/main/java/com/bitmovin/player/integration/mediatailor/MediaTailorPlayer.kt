@@ -4,7 +4,6 @@ import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.on
-import com.bitmovin.player.api.source.SourceConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -16,11 +15,13 @@ class MediaTailorPlayer(
     private val mediaTailorSession: MediaTailorSession = DefaultMediaTailorSession()
     private val scope = CoroutineScope(Dispatchers.Main)
 
-    fun load(sourceConfig: MediaTailorSessionConfig) {
+    fun load(mediaTailorSourceConfig: MediaTailorSourceConfig) {
         scope.launch {
-            val result = mediaTailorSession.initialize(sourceConfig)
-            val source = SourceConfig.fromUrl(result.getOrNull() ?: TODO("Failed to load session"))
-            player.load(source)
+            val result = mediaTailorSession.initialize(mediaTailorSourceConfig.mediaTailorSessionConfig)
+            val manifestUrl = result.getOrNull() ?: TODO("Failed to load session")
+            val sourceConfig = mediaTailorSourceConfig.toSourceConfig(manifestUrl)
+
+            player.load(sourceConfig)
         }
         player.on<PlayerEvent.TimeChanged> {
             Log.d("MediaTailorPlayer", "Time changed: ${it.time}")
