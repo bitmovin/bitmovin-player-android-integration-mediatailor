@@ -2,6 +2,8 @@ package com.bitmovin.player.integration.mediatailor
 
 import android.util.Log
 import com.bitmovin.player.api.Player
+import com.bitmovin.player.api.deficiency.SourceErrorCode
+import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.core.internal.extensionPoint
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +39,12 @@ class MediaTailorPlayer(
                 },
                 onFailure = {
                     Log.e("MediaTailorPlayer", "Failed to initialize session: ${it.message}")
+                    eventEmitter.emit(
+                        SourceEvent.Error(
+                            code = SourceErrorCode.General,
+                            message = "Failed to initialize the MediaTailor session: $mediaTailorSourceConfig"
+                        )
+                    )
                 }
             )
         }

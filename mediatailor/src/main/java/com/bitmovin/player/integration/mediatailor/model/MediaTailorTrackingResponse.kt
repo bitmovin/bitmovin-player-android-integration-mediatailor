@@ -39,7 +39,7 @@ data class TrackingEvent(
 )
 
 @Serializable
-data class ImplicitSessionStartResponse(
+data class MediaTailorSessionInitializationResponse(
     val manifestUrl: String,
     val trackingUrl: String
 )

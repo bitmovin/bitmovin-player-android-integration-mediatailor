@@ -1,23 +1,10 @@
 package com.bitmovin.player.integration.mediatailor
 
-sealed class MediaTailorSessionConfig(
-    open val assetType: MediaTailorAssetType,
-) {
-    data class Implicit(
-        val sessionInitUrl: String,
-        override val assetType: MediaTailorAssetType,
-    ) : MediaTailorSessionConfig(
-        assetType
-    )
-
-    data class Explicit(
-        val manifestUrl: String,
-        val trackingUrl: String,
-        override val assetType: MediaTailorAssetType,
-    ) : MediaTailorSessionConfig(
-        assetType
-    )
-}
+data class MediaTailorSessionConfig(
+    val sessionInitUrl: String,
+    val assetType: MediaTailorAssetType,
+    val sessionInitParams: Any? = null, // TODO
+)
 
 enum class MediaTailorAssetType {
     Vod,

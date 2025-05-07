@@ -45,9 +45,9 @@ class MainActivity : ComponentActivity() {
 
                     DisposableEffect(player) {
                         val source = MediaTailorSourceConfig(
-                            mediaTailorSessionConfig = MediaTailorSessionConfig.Implicit(
+                            mediaTailorSessionConfig = MediaTailorSessionConfig(
+                                sessionInitUrl = "https://awslive.streamco.video/v1/session/86dfd1144b3bf786fc967f2c3876972e5548ca5d/awslive/out/v1/live/jdub-live-bitmovin01/cmaf-cbcs/hls.m3u8",
                                 assetType = MediaTailorAssetType.Linear,
-                                sessionInitUrl = "https://awslive.streamco.video/v1/session/86dfd1144b3bf786fc967f2c3876972e5548ca5d/awslive/out/v1/live/jdub-live-bitmovin01/cmaf-cbcs/hls.m3u8"
                             ),
                             type = SourceType.Hls
                         )
