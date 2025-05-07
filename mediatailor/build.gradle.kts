@@ -1,3 +1,6 @@
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -33,9 +36,21 @@ android {
     }
 }
 
+/** Auto opt-in for InternalBitmovinApi */
+tasks.withType<KotlinJvmCompile>().all {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=com.bitmovin.player.core.internal.InternalBitmovinApi")
+        freeCompilerArgs.add("-opt-in=com.bitmovin.player.core.internal.InternalPlayerApi")
+        freeCompilerArgs.add("-opt-in=com.bitmovin.player.base.internal.InternalBitmovinApi")
+        freeCompilerArgs.add("-opt-in=com.bitmovin.analytics.internal.InternalBitmovinApi")
+    }
+}
+
 dependencies {
     compileOnly(libs.bitmovin.player)
+    compileOnly(libs.bitmovin.player.base)
     implementation(libs.kotlinx.serialization.json)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
