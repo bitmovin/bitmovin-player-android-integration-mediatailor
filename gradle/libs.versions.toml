@@ -15,6 +15,7 @@ kotlinxSerialization = "1.8.0"
 
 [libraries]
 bitmovin-player = { module = "com.bitmovin.player:player", version.ref = "player" }
+bitmovin-player-base = { module = "com.bitmovin.player:player-base", version.ref = "player" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

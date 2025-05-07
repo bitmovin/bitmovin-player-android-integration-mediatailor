@@ -1,10 +1,12 @@
 package com.bitmovin.player.integration.mediatailor
 
 import android.util.Log
+import com.bitmovin.player.api.event.Event
+import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.source.SourceConfig
+import com.bitmovin.player.core.internal.InternalEventEmitter
 import com.bitmovin.player.integration.mediatailor.model.ImplicitSessionStartResponse
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
-import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
 import com.bitmovin.player.integration.mediatailor.network.isSuccess
 import kotlinx.coroutines.CoroutineScope
@@ -22,18 +24,30 @@ private const val TAG = "MediaTailorSession"
 
 internal interface MediaTailorSession : Disposable {
     suspend fun initialize(mediaTailorSourceConfig: MediaTailorSourceConfig): Result<SourceConfig>
+    val trackingResponse: MediaTailorTrackingResponse?
+    val adBreaks: List<MediaTailorAdBreak>
 }
 
 internal class DefaultMediaTailorSession(
-    private val httpClient: HttpClient = DefaultHttpClient(),
+    private val httpClient: HttpClient,
+    private val eventEmitter: InternalEventEmitter<Event>,
+    private val adsMapper: MediaTailorAdsMapper,
 ) : MediaTailorSession {
     private val json = Json {
         ignoreUnknownKeys = true
     }
     private val _trackingUrl = MutableStateFlow<String?>(null)
     private val _trackingResponse = MutableStateFlow<MediaTailorTrackingResponse?>(null)
+    override val trackingResponse: MediaTailorTrackingResponse?
+        get() = _trackingResponse.value
     private val mainScope = CoroutineScope(Dispatchers.Main)
     private var refreshTrackingResponseJob: Job? = null
+    private val _adBreaks = MutableStateFlow<List<MediaTailorAdBreak>>(emptyList())
+    override val adBreaks: List<MediaTailorAdBreak>
+        get() = _adBreaks.value
+
+    private val seenAdBreakIds = mutableSetOf<String>()
+    private val seenAdIds = mutableSetOf<String>()
 
     init {
         mainScope.launch {
@@ -45,12 +59,28 @@ internal class DefaultMediaTailorSession(
         }
         mainScope.launch {
             _trackingResponse.collect { response ->
-                response?.let {
-                    Log.d(TAG, "Tracking Response: $it")
-                    val adBreaks = it.avails.map {
-                        it.availId to (it.startTimeInSeconds to it.startTimeInSeconds + it.durationInSeconds)
+                val response = response ?: return@collect
+                Log.d(TAG, "Tracking Response: $response")
+                val adBreaks = response.avails.map {
+                    it.availId to (it.startTimeInSeconds to it.startTimeInSeconds + it.durationInSeconds)
+                }
+                Log.d(TAG, "Ad Breaks: $adBreaks")
+                _adBreaks.value = adsMapper.mapAdBreaks(response.avails)
+
+                var newAdsScheduledCount = 0
+                _adBreaks.value.forEach { adBreak ->
+                    if (adBreak.id !in seenAdBreakIds) {
+                        seenAdBreakIds.add(adBreak.id)
+                        adBreak.ads.forEach { ad ->
+                            if (ad.id !in seenAdIds) {
+                                seenAdIds.add(ad.id!!)
+                                newAdsScheduledCount++
+                            }
+                        }
                     }
-                    Log.d(TAG, "Ad Breaks: $adBreaks")
+                }
+                if (newAdsScheduledCount > 0) {
+                    eventEmitter.emit(PlayerEvent.AdScheduled(newAdsScheduledCount))
                 }
             }
         }
