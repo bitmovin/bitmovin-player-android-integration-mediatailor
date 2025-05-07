@@ -24,7 +24,6 @@ private const val TAG = "MediaTailorSession"
 
 internal interface MediaTailorSession : Disposable {
     suspend fun initialize(mediaTailorSourceConfig: MediaTailorSourceConfig): Result<SourceConfig>
-    val trackingResponse: MediaTailorTrackingResponse?
     val adBreaks: List<MediaTailorAdBreak>
 }
 
@@ -38,8 +37,6 @@ internal class DefaultMediaTailorSession(
     }
     private val _trackingUrl = MutableStateFlow<String?>(null)
     private val _trackingResponse = MutableStateFlow<MediaTailorTrackingResponse?>(null)
-    override val trackingResponse: MediaTailorTrackingResponse?
-        get() = _trackingResponse.value
     private val mainScope = CoroutineScope(Dispatchers.Main)
     private var refreshTrackingResponseJob: Job? = null
     private val _adBreaks = MutableStateFlow<List<MediaTailorAdBreak>>(emptyList())
@@ -61,10 +58,6 @@ internal class DefaultMediaTailorSession(
             _trackingResponse.collect { response ->
                 val response = response ?: return@collect
                 Log.d(TAG, "Tracking Response: $response")
-                val adBreaks = response.avails.map {
-                    it.availId to (it.startTimeInSeconds to it.startTimeInSeconds + it.durationInSeconds)
-                }
-                Log.d(TAG, "Ad Breaks: $adBreaks")
                 _adBreaks.value = adsMapper.mapAdBreaks(response.avails)
 
                 var newAdsScheduledCount = 0

@@ -20,6 +20,11 @@ class MediaTailorPlayer(
         eventEmitter = eventEmitter,
         adsMapper = DefaultMediaTailorAdsMapper(),
     )
+    private val adTracker: MediaTailorAdTracker = DefaultMediaTailorAdTracker(
+        player = player,
+        mediaTailorSession = mediaTailorSession,
+        eventEmitter = eventEmitter,
+    )
     private val scope = CoroutineScope(Dispatchers.Main)
 
     fun load(mediaTailorSourceConfig: MediaTailorSourceConfig) {
@@ -37,13 +42,8 @@ class MediaTailorPlayer(
         }
     }
 
-    fun getCurrentAdBreak(): MediaTailorAdBreak? {
-        return mediaTailorSession.adBreaks.find {
-            currentTime in (it.scheduleTime..it.scheduleTime + it.duration)
-        }
-    }
-
     override fun destroy() {
+        adTracker.dispose()
         mediaTailorSession.dispose()
         scope.cancel()
         player.destroy()

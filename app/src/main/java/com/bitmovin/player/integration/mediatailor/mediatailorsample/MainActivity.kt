@@ -1,7 +1,6 @@
 package com.bitmovin.player.integration.mediatailor.mediatailorsample
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.bitmovin.player.api.DebugConfig
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.on
@@ -31,6 +31,9 @@ import com.bitmovin.player.integration.mediatailor.mediatailorsample.ui.theme.Me
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // TODO: Remove
+        DebugConfig.isLoggingEnabled = true
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
@@ -38,7 +41,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val context = LocalContext.current
                     val player = remember { MediaTailorPlayer(Player(context)) }
-                    var currentAdBreak by remember { mutableStateOf<MediaTailorAdBreak?>(null) }
+                    var playingAd by remember { mutableStateOf(false) }
 
                     DisposableEffect(player) {
                         val source = MediaTailorSourceConfig(
@@ -50,12 +53,12 @@ class MainActivity : ComponentActivity() {
                         )
                         player.load(source)
 
-                        player.on<PlayerEvent.TimeChanged> {
-                            currentAdBreak = player.getCurrentAdBreak()
+                        player.on<PlayerEvent.AdStarted> {
+                            playingAd = true
                         }
 
-                        player.on<PlayerEvent.AdScheduled> {
-                            Log.d("MainActivity", "Ad scheduled: ${it.numberOfAds}")
+                        player.on<PlayerEvent.AdFinished> {
+                            playingAd = false
                         }
 
                         onDispose {
@@ -68,8 +71,8 @@ class MainActivity : ComponentActivity() {
                             Modifier.padding(innerPadding),
                             player
                         )
-                        if (currentAdBreak != null) {
-                            Text("Current ad break: ${currentAdBreak!!.id} (${currentAdBreak!!.scheduleTime} - ${currentAdBreak!!.scheduleTime + currentAdBreak!!.duration})")
+                        if (playingAd) {
+                            Text("Playing ad")
                         } else {
                             Text("Not playing ad")
                         }

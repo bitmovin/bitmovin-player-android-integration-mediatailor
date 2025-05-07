@@ -4,8 +4,8 @@ sealed class MediaTailorSessionConfig(
     open val assetType: MediaTailorAssetType,
 ) {
     data class Implicit(
-        override val assetType: MediaTailorAssetType,
         val sessionInitUrl: String,
+        override val assetType: MediaTailorAssetType,
     ) : MediaTailorSessionConfig(
         assetType
     )

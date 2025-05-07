@@ -1,15 +1,13 @@
 package com.bitmovin.player.integration.mediatailor
 
-import com.bitmovin.player.api.advertising.Ad
 import com.bitmovin.player.api.advertising.AdBreak
 import com.bitmovin.player.api.advertising.AdData
 import com.bitmovin.player.api.advertising.LinearAd
 import com.bitmovin.player.api.advertising.LinearAdUiConfig
 
-
 public class MediaTailorAdBreak(
     override val id: String,
-    override val ads: List<Ad>,
+    override val ads: List<MediaTailorLinearAd>,
     override val scheduleTime: Double,
     val duration: Double,
     override val replaceContentDuration: Double? = null
@@ -17,6 +15,7 @@ public class MediaTailorAdBreak(
 
 public class MediaTailorLinearAd(
     override val id: String?,
+    val scheduleTime: Double,
     override val duration: Double,
     override val uiConfig: LinearAdUiConfig? = LinearAdUiConfig(requestsUi = true),
     override val skippableAfter: Double? = null,

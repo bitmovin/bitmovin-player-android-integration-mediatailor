@@ -14,6 +14,7 @@ internal class DefaultMediaTailorAdsMapper : MediaTailorAdsMapper {
                 ads = avail.ads.map { ad ->
                     MediaTailorLinearAd(
                         id = ad.adId,
+                        scheduleTime = ad.startTimeInSeconds,
                         duration = ad.durationInSeconds,
                     )
                 },
