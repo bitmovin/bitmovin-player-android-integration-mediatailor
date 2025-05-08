@@ -4,16 +4,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.io.BufferedWriter
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.coroutines.cancellation.CancellationException
 
 internal interface HttpClient {
     suspend fun get(url: String): HttpRequestResult
-    suspend fun post(url: String): HttpRequestResult
+    suspend fun post(url: String, body: Map<String, Any> = emptyMap()): HttpRequestResult
 }
 
 internal class DefaultHttpClient : HttpClient {
@@ -21,8 +24,16 @@ internal class DefaultHttpClient : HttpClient {
         urlConnection.requestMethod = "GET"
     }
 
-    override suspend fun post(url: String): HttpRequestResult = request(url) { urlConnection ->
+    override suspend fun post(
+        url: String,
+        body: Map<String, Any>,
+    ): HttpRequestResult = request(url) { urlConnection ->
         urlConnection.requestMethod = "POST"
+        if (body.isNotEmpty()) {
+            urlConnection.setRequestProperty("Content-Type", "application/json")
+            urlConnection.doOutput = true
+            urlConnection.setJsonBody(JSONObject(body).toString())
+        }
     }
 
     private suspend fun request(
@@ -49,6 +60,13 @@ internal class DefaultHttpClient : HttpClient {
 }
 
 private fun Int.isSuccessfulHttpResponse() = this in 200..299
+
+private fun HttpURLConnection.setJsonBody(json: String) = outputStream.use { outputStream ->
+    BufferedWriter(OutputStreamWriter(outputStream, "UTF-8")).use { writer ->
+        writer.write(json)
+        writer.flush()
+    }
+}
 
 private suspend fun InputStream.readUtf8String() = use {
     closeOnCancel {

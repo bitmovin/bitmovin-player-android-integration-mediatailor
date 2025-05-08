@@ -83,7 +83,7 @@ internal class DefaultMediaTailorAdTracker(
     }
 
     private fun MediaTailorAdBreak.findCurrentAd(): MediaTailorLinearAd? {
-        return findCurrentAdBreak()?.ads?.find {
+        return ads.find {
             player.currentTime in (it.scheduleTime..it.scheduleTime + it.duration)
         }
     }

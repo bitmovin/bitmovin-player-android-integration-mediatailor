@@ -12,7 +12,7 @@ import com.bitmovin.player.api.source.SourceOptions
 import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.api.vr.VrConfig
 
-class MediaTailorSourceConfig(
+public class MediaTailorSourceConfig(
     /**
      * MediaTailor session configuration.
      */
@@ -98,7 +98,7 @@ class MediaTailorSourceConfig(
     liveConfig,
 )
 
-fun MediaTailorSourceConfig.toSourceConfig(manifestUrl: String): SourceConfig =
+internal fun MediaTailorSourceConfig.toSourceConfig(manifestUrl: String): SourceConfig =
     SourceConfig(
         manifestUrl,
         type,
@@ -118,4 +118,5 @@ fun MediaTailorSourceConfig.toSourceConfig(manifestUrl: String): SourceConfig =
         liveConfig
     )
 
-const val MEDIA_TAILOR_SESSION_NOT_INITIALIZED_YET = "MEDIA_TAILOR_SESSION_NOT_INITIALIZED_YET"
+private const val MEDIA_TAILOR_SESSION_NOT_INITIALIZED_YET =
+    "MEDIA_TAILOR_SESSION_NOT_INITIALIZED_YET"

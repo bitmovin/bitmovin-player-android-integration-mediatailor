@@ -114,7 +114,10 @@ internal class DefaultMediaTailorSession(
     private suspend fun requestSessionInitialization(
         sessionConfig: MediaTailorSessionConfig
     ): MediaTailorSessionInitializationResponse {
-        val response = httpClient.post(sessionConfig.sessionInitUrl)
+        val response = httpClient.post(
+            sessionConfig.sessionInitUrl,
+            sessionConfig.sessionInitParams
+        )
         return if (response.isSuccess) {
             json.decodeFromString<MediaTailorSessionInitializationResponse>(response.body!!)
         } else {
