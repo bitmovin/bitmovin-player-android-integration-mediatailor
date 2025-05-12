@@ -16,7 +16,7 @@ public class MediaTailorSourceConfig(
     /**
      * MediaTailor session configuration.
      */
-    val mediaTailorSessionConfig: MediaTailorSessionConfig,
+    val sessionConfig: MediaTailorSessionConfig,
     /**
      * The [SourceType] of the [Source].
      */

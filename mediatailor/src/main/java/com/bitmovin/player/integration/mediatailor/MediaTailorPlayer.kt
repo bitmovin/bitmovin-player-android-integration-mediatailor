@@ -4,11 +4,15 @@ import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.deficiency.SourceErrorCode
 import com.bitmovin.player.api.event.SourceEvent
+import com.bitmovin.player.api.event.on
 import com.bitmovin.player.core.internal.extensionPoint
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class MediaTailorPlayer(
@@ -22,12 +26,27 @@ class MediaTailorPlayer(
         eventEmitter = eventEmitter,
         adsMapper = DefaultMediaTailorAdsMapper(),
     )
-    private val adTracker: MediaTailorAdTracker = DefaultMediaTailorAdTracker(
-        player = player,
-        mediaTailorSession = mediaTailorSession,
-        eventEmitter = eventEmitter,
-    )
+    private val adPlaybackTracker: MediaTailorAdPlaybackTracker =
+        DefaultMediaTailorAdPlaybackTracker(
+            player = player,
+            mediaTailorSession = mediaTailorSession,
+            eventEmitter = eventEmitter,
+        )
     private val scope = CoroutineScope(Dispatchers.Main)
+    private var refreshTrackingResponseJob: Job? = null
+
+    private val onSourceLoaded: (SourceEvent.Loaded) -> Unit = { event ->
+        if (player.isLive) {
+            refreshTrackingResponseJob?.cancel()
+            refreshTrackingResponseJob = continuouslyFetchTrackingDataJob()
+        } else {
+            scope.launch { mediaTailorSession.fetchTrackingData() }
+        }
+    }
+
+    private val onSourceUnloaded: (SourceEvent.Unloaded) -> Unit = { event ->
+        mediaTailorSession.dispose()
+    }
 
     fun load(mediaTailorSourceConfig: MediaTailorSourceConfig) {
         scope.launch {
@@ -35,6 +54,7 @@ class MediaTailorPlayer(
             result.fold(
                 onSuccess = {
                     Log.d("MediaTailorPlayer", "Session initialized successfully")
+                    registerPlayerEvents()
                     player.load(it)
                 },
                 onFailure = {
@@ -50,9 +70,29 @@ class MediaTailorPlayer(
         }
     }
 
+    private fun continuouslyFetchTrackingDataJob() = scope.launch {
+        while (isActive) {
+            mediaTailorSession.fetchTrackingData()
+            delay(4_000)
+        }
+    }
+
+    private fun registerPlayerEvents() {
+        player.on(onSourceLoaded)
+        player.on(onSourceUnloaded)
+    }
+
+    private fun unregisterPlayerEvents() {
+        player.off(onSourceLoaded)
+        player.off(onSourceUnloaded)
+    }
+
     override fun destroy() {
-        adTracker.dispose()
+        unregisterPlayerEvents()
+        adPlaybackTracker.dispose()
         mediaTailorSession.dispose()
+        refreshTrackingResponseJob?.cancel()
+        refreshTrackingResponseJob = null
         scope.cancel()
         player.destroy()
     }

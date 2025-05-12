@@ -21,7 +21,6 @@ import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.on
 import com.bitmovin.player.api.source.SourceType
-import com.bitmovin.player.integration.mediatailor.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.MediaTailorAssetType
 import com.bitmovin.player.integration.mediatailor.MediaTailorPlayer
 import com.bitmovin.player.integration.mediatailor.MediaTailorSessionConfig
@@ -45,7 +44,7 @@ class MainActivity : ComponentActivity() {
 
                     DisposableEffect(player) {
                         val source = MediaTailorSourceConfig(
-                            mediaTailorSessionConfig = MediaTailorSessionConfig(
+                            sessionConfig = MediaTailorSessionConfig(
                                 sessionInitUrl = "https://awslive.streamco.video/v1/session/86dfd1144b3bf786fc967f2c3876972e5548ca5d/awslive/out/v1/live/jdub-live-bitmovin01/cmaf-cbcs/hls.m3u8",
                                 assetType = MediaTailorAssetType.Linear,
                             ),

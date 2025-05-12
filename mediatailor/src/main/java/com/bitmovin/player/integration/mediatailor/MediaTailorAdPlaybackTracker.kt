@@ -13,15 +13,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal interface MediaTailorAdTracker : Disposable {
+internal interface MediaTailorAdPlaybackTracker : Disposable {
 
 }
 
-internal class DefaultMediaTailorAdTracker(
+internal class DefaultMediaTailorAdPlaybackTracker(
     private val player: Player,
     private val mediaTailorSession: MediaTailorSession,
     private val eventEmitter: InternalEventEmitter<Event>,
-) : MediaTailorAdTracker {
+) : MediaTailorAdPlaybackTracker {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val _currentAdBreak = MutableStateFlow<MediaTailorAdBreak?>(null)
     private val _currentAd = MutableStateFlow<MediaTailorLinearAd?>(null)
