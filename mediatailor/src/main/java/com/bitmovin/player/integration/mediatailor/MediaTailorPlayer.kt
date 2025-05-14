@@ -26,6 +26,12 @@ class MediaTailorPlayer(
         eventEmitter = eventEmitter,
         adsMapper = DefaultMediaTailorAdsMapper(),
     )
+    private val adPlaybackTracker: MediaTailorAdPlaybackTracker =
+        DefaultMediaTailorAdPlaybackTracker(
+            player = player,
+            mediaTailorSession = mediaTailorSession,
+            eventEmitter = eventEmitter,
+        )
     private val scope = CoroutineScope(Dispatchers.Main)
     private var refreshTrackingResponseJob: Job? = null
 
@@ -90,6 +96,7 @@ class MediaTailorPlayer(
         mediaTailorSession.dispose()
         refreshTrackingResponseJob?.cancel()
         refreshTrackingResponseJob = null
+        adPlaybackTracker.dispose()
         scope.cancel()
         player.destroy()
     }
