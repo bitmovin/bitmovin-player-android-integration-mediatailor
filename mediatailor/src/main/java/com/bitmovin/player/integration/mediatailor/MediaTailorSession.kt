@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -21,11 +22,11 @@ import java.net.URI
 
 private const val TAG = "MediaTailorSession"
 
-internal interface MediaTailorSession : Disposable {
+interface MediaTailorSession : Disposable {
     suspend fun initialize(mediaTailorSourceConfig: MediaTailorSourceConfig): Result<SourceConfig>
     suspend fun fetchTrackingData(): Boolean
     val isInitialized: Boolean
-    val adBreaks: List<MediaTailorAdBreak>
+    val adBreaks: StateFlow<List<MediaTailorAdBreak>>
 }
 
 internal class DefaultMediaTailorSession(
@@ -40,8 +41,8 @@ internal class DefaultMediaTailorSession(
     private val _trackingResponse = MutableStateFlow<MediaTailorTrackingResponse?>(null)
     private val mainScope = CoroutineScope(Dispatchers.Main)
     private val _adBreaks = MutableStateFlow<List<MediaTailorAdBreak>>(emptyList())
-    override val adBreaks: List<MediaTailorAdBreak>
-        get() = _adBreaks.value
+    override val adBreaks: StateFlow<List<MediaTailorAdBreak>>
+        get() = _adBreaks
 
     private val seenAdBreakIds = mutableSetOf<String>()
     private val seenAdIds = mutableSetOf<String>()
