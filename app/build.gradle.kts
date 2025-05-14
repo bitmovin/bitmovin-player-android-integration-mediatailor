@@ -5,13 +5,17 @@ plugins {
 }
 
 android {
+    val minSdkVersion: String by rootProject
+    val compileSdkVersion: String by rootProject
+    val targetSdkVersion: String by rootProject
+
     namespace = "com.bitmovin.player.integration.mediatailor.mediatailorsample"
-    compileSdk = 35
+    compileSdk = compileSdkVersion.toInt()
 
     defaultConfig {
         applicationId = "com.bitmovin.player.integration.mediatailor.mediatailorsample"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = minSdkVersion.toInt()
+        targetSdk = targetSdkVersion.toInt()
         versionCode = 1
         versionName = "1.0"
 

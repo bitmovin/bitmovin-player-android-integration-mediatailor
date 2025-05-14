@@ -12,6 +12,7 @@ appcompat = "1.7.0"
 material = "1.10.0"
 player = "3.108.0"
 kotlinxSerialization = "1.8.0"
+pluginArtifactory = "5.2.5"
 
 [libraries]
 bitmovin-player = { module = "com.bitmovin.player:player", version.ref = "player" }
@@ -40,4 +41,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+jfrog-artifactory = { id = "com.jfrog.artifactory", version.ref = "pluginArtifactory" }
 
