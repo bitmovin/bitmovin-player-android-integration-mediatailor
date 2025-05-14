@@ -116,7 +116,9 @@ internal class DefaultMediaTailorSession(
     }
 
     /**
-     * Throws [IOException] if the request fails.
+     * Throws:
+     * - [IOException] if the request fails
+     * - [kotlinx.serialization.SerializationException] if the response cannot be parsed
      */
     private suspend fun requestSessionInitialization(
         sessionConfig: MediaTailorSessionConfig
@@ -133,7 +135,9 @@ internal class DefaultMediaTailorSession(
     }
 
     /**
-     * Throws [IOException] if the request fails.
+     * Throws:
+     * - [IOException] if the request fails
+     * - [kotlinx.serialization.SerializationException] if the response cannot be parsed
      */
     private suspend fun requestTrackingData(trackingUrl: String): MediaTailorTrackingResponse {
         val response = httpClient.get(trackingUrl)

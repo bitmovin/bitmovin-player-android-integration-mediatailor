@@ -40,7 +40,6 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val context = LocalContext.current
                     val player = remember { MediaTailorPlayer(Player(context)) }
-                    var playingAd by remember { mutableStateOf(false) }
 
                     DisposableEffect(player) {
                         val source = MediaTailorSourceConfig(
@@ -52,14 +51,6 @@ class MainActivity : ComponentActivity() {
                         )
                         player.load(source)
 
-                        player.on<PlayerEvent.AdStarted> {
-                            playingAd = true
-                        }
-
-                        player.on<PlayerEvent.AdFinished> {
-                            playingAd = false
-                        }
-
                         onDispose {
                             player.destroy()
                         }
@@ -70,11 +61,6 @@ class MainActivity : ComponentActivity() {
                             Modifier.padding(innerPadding),
                             player
                         )
-                        if (playingAd) {
-                            Text("Playing ad")
-                        } else {
-                            Text("Not playing ad")
-                        }
                     }
                 }
             }
