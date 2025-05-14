@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "AdPlaybackTracker"
 
-data class AdProgress(
+public data class AdProgress(
     val adBreak: MediaTailorAdBreak,
     val ad: MediaTailorLinearAd,
     val progress: Double,

@@ -17,6 +17,7 @@ public class MediaTailorLinearAd(
     override val id: String?,
     val scheduleTime: Double,
     override val duration: Double,
+    val trackingEvents: List<MediaTailorTrackingEvent> = emptyList(),
     override val uiConfig: LinearAdUiConfig? = LinearAdUiConfig(requestsUi = true),
     override val skippableAfter: Double? = null,
     override val clickThroughUrl: String? = null,
@@ -30,3 +31,11 @@ public class MediaTailorLinearAd(
         TODO("Not yet implemented")
     }
 }
+
+public class MediaTailorTrackingEvent(
+    val id: String,
+    val startTime: Double,
+    val duration: Double,
+    val eventType: String,
+    val beaconUrls: List<String>,
+)

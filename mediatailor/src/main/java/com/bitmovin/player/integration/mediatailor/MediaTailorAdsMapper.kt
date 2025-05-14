@@ -16,6 +16,15 @@ internal class DefaultMediaTailorAdsMapper : MediaTailorAdsMapper {
                         id = ad.adId,
                         scheduleTime = ad.startTimeInSeconds,
                         duration = ad.durationInSeconds,
+                        trackingEvents = ad.trackingEvents.map { trackingEvent ->
+                            MediaTailorTrackingEvent(
+                                id = trackingEvent.eventId,
+                                startTime = trackingEvent.startTimeInSeconds,
+                                duration = trackingEvent.durationInSeconds,
+                                eventType = trackingEvent.eventType,
+                                beaconUrls = trackingEvent.beaconUrls,
+                            )
+                        },
                     )
                 },
                 scheduleTime = avail.startTimeInSeconds,

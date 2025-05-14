@@ -1,10 +1,7 @@
 package com.bitmovin.player.integration.mediatailor
 
 import android.util.Log
-import com.bitmovin.player.api.event.Event
-import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.source.SourceConfig
-import com.bitmovin.player.core.internal.InternalEventEmitter
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorSessionInitializationResponse
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
@@ -31,7 +28,6 @@ interface MediaTailorSession : Disposable {
 
 internal class DefaultMediaTailorSession(
     private val httpClient: HttpClient,
-    private val eventEmitter: InternalEventEmitter<Event>,
     private val adsMapper: MediaTailorAdsMapper,
 ) : MediaTailorSession {
     private val json = Json {
@@ -43,9 +39,6 @@ internal class DefaultMediaTailorSession(
     private val _adBreaks = MutableStateFlow<List<MediaTailorAdBreak>>(emptyList())
     override val adBreaks: StateFlow<List<MediaTailorAdBreak>>
         get() = _adBreaks
-
-    private val seenAdBreakIds = mutableSetOf<String>()
-    private val seenAdIds = mutableSetOf<String>()
 
     init {
         mainScope.launch {
@@ -60,22 +53,6 @@ internal class DefaultMediaTailorSession(
                 val response = response ?: return@collect
                 Log.d(TAG, "Tracking Response: $response")
                 _adBreaks.value = adsMapper.mapAdBreaks(response.avails)
-
-                var newAdsScheduledCount = 0
-                _adBreaks.value.forEach { adBreak ->
-                    if (adBreak.id !in seenAdBreakIds) {
-                        seenAdBreakIds.add(adBreak.id)
-                        adBreak.ads.forEach { ad ->
-                            if (ad.id !in seenAdIds) {
-                                seenAdIds.add(ad.id!!)
-                                newAdsScheduledCount++
-                            }
-                        }
-                    }
-                }
-                if (newAdsScheduledCount > 0) {
-                    eventEmitter.emit(PlayerEvent.AdScheduled(newAdsScheduledCount))
-                }
             }
         }
     }

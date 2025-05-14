@@ -6,7 +6,11 @@ import com.bitmovin.player.api.deficiency.SourceErrorCode
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.on
 import com.bitmovin.player.core.internal.extensionPoint
+import com.bitmovin.player.integration.mediatailor.beaconing.DefaultMediaTailorAdBeaconing
+import com.bitmovin.player.integration.mediatailor.beaconing.MediaTailorAdBeaconing
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
+import com.bitmovin.player.integration.mediatailor.network.HttpClient
+import com.bitmovin.player.integration.mediatailor.network.HttpRequestResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,17 +27,22 @@ class MediaTailorPlayer(
         player.extensionPoint.eventEmitter
     ),
 ) : Player by player {
-    private val mediaTailorSession: MediaTailorSession =
-        DefaultMediaTailorSession(
-            httpClient = DefaultHttpClient(),
-            eventEmitter = eventEmitter,
-            adsMapper = DefaultMediaTailorAdsMapper(),
-        )
+    private val httpClient = DefaultHttpClient()
+    private val adMapper = DefaultMediaTailorAdsMapper()
+    private val mediaTailorSession: MediaTailorSession = DefaultMediaTailorSession(
+        httpClient = httpClient,
+        adsMapper = adMapper,
+    )
     private val adPlaybackTracker: MediaTailorAdPlaybackTracker =
         DefaultMediaTailorAdPlaybackTracker(
             player = player,
             mediaTailorSession = mediaTailorSession,
         )
+    private val adBeaconing: MediaTailorAdBeaconing = DefaultMediaTailorAdBeaconing(
+        player = player,
+        adPlaybackTracker = adPlaybackTracker,
+        httpClient = httpClient,
+    )
     private val scope = CoroutineScope(Dispatchers.Main)
     private var refreshTrackingResponseJob: Job? = null
 
@@ -92,6 +101,26 @@ class MediaTailorPlayer(
         }
     }
 
+    override fun mute() {
+        adBeaconing.track("mute")
+        player.mute()
+    }
+
+    override fun unmute() {
+        adBeaconing.track("unmute")
+        player.unmute()
+    }
+
+    override fun play() {
+        adBeaconing.track("play")
+        player.play()
+    }
+
+    override fun pause() {
+        adBeaconing.track("pause")
+        player.pause()
+    }
+
     private fun continuouslyFetchTrackingDataJob() = scope.launch {
         while (isActive) {
             if (isPlaying) {
@@ -113,6 +142,7 @@ class MediaTailorPlayer(
 
     override fun destroy() {
         unregisterPlayerEvents()
+        adBeaconing.dispose()
         mediaTailorSession.dispose()
         refreshTrackingResponseJob?.cancel()
         refreshTrackingResponseJob = null
