@@ -1,19 +1,22 @@
 package com.bitmovin.player.integration.mediatailor
 
 import android.util.Log
-import com.bitmovin.player.api.event.Event
-import com.bitmovin.player.api.event.PlayerEvent
-import com.bitmovin.player.api.source.SourceConfig
-import com.bitmovin.player.core.internal.InternalEventEmitter
+import com.bitmovin.player.api.Player
+import com.bitmovin.player.api.event.SourceEvent
+import com.bitmovin.player.api.event.on
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorSessionInitializationResponse
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
 import com.bitmovin.player.integration.mediatailor.network.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okio.IOException
@@ -21,16 +24,16 @@ import java.net.URI
 
 private const val TAG = "MediaTailorSession"
 
-internal interface MediaTailorSession : Disposable {
-    suspend fun initialize(mediaTailorSourceConfig: MediaTailorSourceConfig): Result<SourceConfig>
+interface MediaTailorSession : Disposable {
+    suspend fun initialize(sessionConfig: MediaTailorSessionConfig): Result<String>
     suspend fun fetchTrackingData(): Boolean
     val isInitialized: Boolean
-    val adBreaks: List<MediaTailorAdBreak>
+    val adBreaks: StateFlow<List<MediaTailorAdBreak>>
 }
 
 internal class DefaultMediaTailorSession(
+    private val player: Player,
     private val httpClient: HttpClient,
-    private val eventEmitter: InternalEventEmitter<Event>,
     private val adsMapper: MediaTailorAdsMapper,
 ) : MediaTailorSession {
     private val json = Json {
@@ -40,11 +43,23 @@ internal class DefaultMediaTailorSession(
     private val _trackingResponse = MutableStateFlow<MediaTailorTrackingResponse?>(null)
     private val mainScope = CoroutineScope(Dispatchers.Main)
     private val _adBreaks = MutableStateFlow<List<MediaTailorAdBreak>>(emptyList())
-    override val adBreaks: List<MediaTailorAdBreak>
-        get() = _adBreaks.value
+    override val adBreaks: StateFlow<List<MediaTailorAdBreak>>
+        get() = _adBreaks
+    private var refreshTrackingResponseJob: Job? = null
 
-    private val seenAdBreakIds = mutableSetOf<String>()
-    private val seenAdIds = mutableSetOf<String>()
+    private val onSourceLoaded: (SourceEvent.Loaded) -> Unit = { event ->
+        if (player.isLive) {
+            refreshTrackingResponseJob?.cancel()
+            refreshTrackingResponseJob = continuouslyFetchTrackingDataJob()
+        } else {
+            mainScope.launch { fetchTrackingData() }
+        }
+    }
+
+    private val onSourceUnloaded: (SourceEvent.Unloaded) -> Unit = { event ->
+        refreshTrackingResponseJob?.cancel()
+        refreshTrackingResponseJob = null
+    }
 
     init {
         mainScope.launch {
@@ -59,30 +74,33 @@ internal class DefaultMediaTailorSession(
                 val response = response ?: return@collect
                 Log.d(TAG, "Tracking Response: $response")
                 _adBreaks.value = adsMapper.mapAdBreaks(response.avails)
-
-                var newAdsScheduledCount = 0
-                _adBreaks.value.forEach { adBreak ->
-                    if (adBreak.id !in seenAdBreakIds) {
-                        seenAdBreakIds.add(adBreak.id)
-                        adBreak.ads.forEach { ad ->
-                            if (ad.id !in seenAdIds) {
-                                seenAdIds.add(ad.id!!)
-                                newAdsScheduledCount++
-                            }
-                        }
-                    }
-                }
-                if (newAdsScheduledCount > 0) {
-                    eventEmitter.emit(PlayerEvent.AdScheduled(newAdsScheduledCount))
-                }
             }
+        }
+        registerPlayerEvents()
+    }
+
+    private fun continuouslyFetchTrackingDataJob() = mainScope.launch {
+        while (isActive) {
+            if (player.isPlaying) {
+                fetchTrackingData()
+            }
+            delay(4_000)
         }
     }
 
+    private fun registerPlayerEvents() {
+        player.on(onSourceLoaded)
+        player.on(onSourceUnloaded)
+    }
+
+    private fun unregisterPlayerEvents() {
+        player.off(onSourceLoaded)
+        player.off(onSourceUnloaded)
+    }
+
     override suspend fun initialize(
-        mediaTailorSourceConfig: MediaTailorSourceConfig
-    ): Result<SourceConfig> {
-        val sessionConfig = mediaTailorSourceConfig.sessionConfig
+        sessionConfig: MediaTailorSessionConfig,
+    ): Result<String> {
         val response = runCatching {
             requestSessionInitialization(sessionConfig)
         }
@@ -97,7 +115,7 @@ internal class DefaultMediaTailorSession(
 
         _trackingUrl.update { trackingUrl }
 
-        return Result.success(mediaTailorSourceConfig.toSourceConfig(manifestUrl))
+        return Result.success(manifestUrl)
     }
 
     override suspend fun fetchTrackingData(): Boolean {
@@ -149,6 +167,7 @@ internal class DefaultMediaTailorSession(
     }
 
     override fun dispose() {
+        unregisterPlayerEvents()
         _trackingUrl.update { null }
         mainScope.cancel()
     }
