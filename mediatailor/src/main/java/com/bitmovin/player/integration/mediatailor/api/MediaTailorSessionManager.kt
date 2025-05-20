@@ -37,7 +37,7 @@ public class MediaTailorSessionManager(
 
     public fun initializeSession(
         sessionConfig: MediaTailorSessionConfig,
-        callback: (Result<String>) -> Unit
+        callback: (SessionInitializationResult) -> Unit
     ) {
         scope.launch {
             val sessionResult = initializeSession(sessionConfig)
@@ -47,11 +47,11 @@ public class MediaTailorSessionManager(
 
     public suspend fun initializeSession(
         sessionConfig: MediaTailorSessionConfig
-    ): Result<String> {
+    ): SessionInitializationResult {
         val session = DefaultMediaTailorSession(player, httpClient, adMapper, sessionConfig)
         val sessionInitResult = session.initialize(sessionConfig)
 
-        if (sessionInitResult.isSuccess) {
+        if (sessionInitResult is SessionInitializationResult.Success) {
             adPlaybackTracker = DefaultMediaTailorAdPlaybackTracker(player, session)
             adBeaconing = DefaultMediaTailorAdBeaconing(player, adPlaybackTracker!!, httpClient)
             this@MediaTailorSessionManager.session = session

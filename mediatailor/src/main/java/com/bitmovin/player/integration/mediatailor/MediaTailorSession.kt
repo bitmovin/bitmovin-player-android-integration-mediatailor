@@ -5,6 +5,7 @@ import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAssetType
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
+import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorSessionInitializationResponse
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
@@ -29,7 +30,7 @@ import java.net.URI
 private const val TAG = "MediaTailorSession"
 
 interface MediaTailorSession : Disposable {
-    suspend fun initialize(sessionConfig: MediaTailorSessionConfig): Result<String>
+    suspend fun initialize(sessionConfig: MediaTailorSessionConfig): SessionInitializationResult
     suspend fun fetchTrackingData(): Boolean
     val isInitialized: Boolean
     val adBreaks: StateFlow<List<MediaTailorAdBreak>>
@@ -104,12 +105,12 @@ internal class DefaultMediaTailorSession(
 
     override suspend fun initialize(
         sessionConfig: MediaTailorSessionConfig,
-    ): Result<String> {
+    ): SessionInitializationResult {
         val response = runCatching {
             requestSessionInitialization(sessionConfig)
         }
         if (response.isFailure) {
-            return Result.failure(response.exceptionOrNull()!!)
+            return SessionInitializationResult.Failure(response.exceptionOrNull()!!.message)
         }
 
         val successResponse = response.getOrThrow()
@@ -119,7 +120,7 @@ internal class DefaultMediaTailorSession(
 
         _trackingUrl.update { trackingUrl }
 
-        return Result.success(manifestUrl)
+        return SessionInitializationResult.Success(manifestUrl = manifestUrl)
     }
 
     override suspend fun fetchTrackingData(): Boolean {
