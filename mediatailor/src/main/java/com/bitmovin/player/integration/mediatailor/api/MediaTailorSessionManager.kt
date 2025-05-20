@@ -48,7 +48,7 @@ public class MediaTailorSessionManager(
     public suspend fun initializeSession(
         sessionConfig: MediaTailorSessionConfig
     ): Result<String> {
-        val session = DefaultMediaTailorSession(player, httpClient, adMapper)
+        val session = DefaultMediaTailorSession(player, httpClient, adMapper, sessionConfig)
         val sessionInitResult = session.initialize(sessionConfig)
 
         if (sessionInitResult.isSuccess) {
