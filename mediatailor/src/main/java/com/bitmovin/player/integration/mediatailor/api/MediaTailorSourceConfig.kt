@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.mediatailor
+package com.bitmovin.player.integration.mediatailor.api
 
 import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.drm.DrmConfig

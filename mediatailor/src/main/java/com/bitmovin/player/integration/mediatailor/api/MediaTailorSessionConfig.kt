@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.mediatailor
+package com.bitmovin.player.integration.mediatailor.api
 
 public data class MediaTailorSessionConfig(
     /**

@@ -1,6 +1,9 @@
 package com.bitmovin.player.integration.mediatailor
 
 import com.bitmovin.player.integration.mediatailor.model.Avail
+import com.bitmovin.player.integration.mediatailor.model.MediaTailorAdBreak
+import com.bitmovin.player.integration.mediatailor.model.MediaTailorLinearAd
+import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingEvent
 
 internal interface MediaTailorAdsMapper {
     fun mapAdBreaks(avails: List<Avail>): List<MediaTailorAdBreak>

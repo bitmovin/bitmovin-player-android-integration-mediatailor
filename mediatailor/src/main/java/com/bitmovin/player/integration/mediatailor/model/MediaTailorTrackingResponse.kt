@@ -37,9 +37,3 @@ data class TrackingEvent(
     val startTime: String,
     val startTimeInSeconds: Double
 )
-
-@Serializable
-data class MediaTailorSessionInitializationResponse(
-    val manifestUrl: String,
-    val trackingUrl: String
-)

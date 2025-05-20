@@ -1,10 +1,16 @@
-package com.bitmovin.player.integration.mediatailor
+package com.bitmovin.player.integration.mediatailor.api
 
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
-import com.bitmovin.player.integration.mediatailor.beaconing.DefaultMediaTailorAdBeaconing
-import com.bitmovin.player.integration.mediatailor.beaconing.MediaTailorAdBeaconing
+import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorAdPlaybackTracker
+import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorAdsMapper
+import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSession
+import com.bitmovin.player.integration.mediatailor.MediaTailorAdPlaybackTracker
+import com.bitmovin.player.integration.mediatailor.MediaTailorSession
+import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorAdBeaconing
+import com.bitmovin.player.integration.mediatailor.MediaTailorAdBeaconing
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
+import com.bitmovin.player.integration.mediatailor.util.Disposable
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

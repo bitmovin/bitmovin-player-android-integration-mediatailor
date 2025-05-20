@@ -1,14 +1,16 @@
-package com.bitmovin.player.integration.mediatailor.beaconing
+package com.bitmovin.player.integration.mediatailor
 
 import android.util.Log
 import com.bitmovin.player.api.Player
-import com.bitmovin.player.integration.mediatailor.Disposable
-import com.bitmovin.player.integration.mediatailor.MediaTailorAdPlaybackTracker
-import com.bitmovin.player.integration.mediatailor.MediaTailorTrackingEvent
+import com.bitmovin.player.api.event.PlayerEvent
+import com.bitmovin.player.integration.mediatailor.util.Disposable
+import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingEvent
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
+import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 private const val TAG = "AdBeaconing"
@@ -44,6 +46,13 @@ internal class DefaultMediaTailorAdBeaconing(
                     }
             }
         }
+        scope.launch {
+            combine(
+                player.eventFlow<PlayerEvent.Muted>(),
+                player.eventFlow<PlayerEvent.Unmuted>(),
+            ) {
+            }
+        }
     }
 
     override fun track(eventType: String) {
@@ -76,3 +85,13 @@ private val MediaTailorTrackingEvent.isLinearAdMetric: Boolean
 // when checking if the tracking event should be fired
 private val MediaTailorTrackingEvent.paddedStartTime: ClosedRange<Double>
     get() = startTime - 0.3..startTime + 0.3
+
+private val linearAdMetricEventTypes = setOf(
+    "loaded",
+    "start",
+    "firstQuartile",
+    "midpoint",
+    "thirdQuartile",
+    "complete",
+    "progress",
+)

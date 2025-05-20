@@ -3,11 +3,14 @@ package com.bitmovin.player.integration.mediatailor
 import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.SourceEvent
-import com.bitmovin.player.api.event.on
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
+import com.bitmovin.player.integration.mediatailor.model.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorSessionInitializationResponse
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
 import com.bitmovin.player.integration.mediatailor.network.isSuccess
+import com.bitmovin.player.integration.mediatailor.util.Disposable
+import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -47,20 +50,6 @@ internal class DefaultMediaTailorSession(
         get() = _adBreaks
     private var refreshTrackingResponseJob: Job? = null
 
-    private val onSourceLoaded: (SourceEvent.Loaded) -> Unit = { event ->
-        if (player.isLive) {
-            refreshTrackingResponseJob?.cancel()
-            refreshTrackingResponseJob = continuouslyFetchTrackingDataJob()
-        } else {
-            mainScope.launch { fetchTrackingData() }
-        }
-    }
-
-    private val onSourceUnloaded: (SourceEvent.Unloaded) -> Unit = { event ->
-        refreshTrackingResponseJob?.cancel()
-        refreshTrackingResponseJob = null
-    }
-
     init {
         mainScope.launch {
             _trackingUrl.collect { trackingUrl ->
@@ -73,10 +62,25 @@ internal class DefaultMediaTailorSession(
             _trackingResponse.collect { response ->
                 val response = response ?: return@collect
                 Log.d(TAG, "Tracking Response: $response")
-                _adBreaks.value = adsMapper.mapAdBreaks(response.avails)
+                _adBreaks.update { adsMapper.mapAdBreaks(response.avails) }
             }
         }
-        registerPlayerEvents()
+        mainScope.launch {
+            player.eventFlow<SourceEvent.Loaded>().collect { event ->
+                if (player.isLive) {
+                    refreshTrackingResponseJob?.cancel()
+                    refreshTrackingResponseJob = continuouslyFetchTrackingDataJob()
+                } else {
+                    mainScope.launch { fetchTrackingData() }
+                }
+            }
+        }
+        mainScope.launch {
+            player.eventFlow<SourceEvent.Unloaded>().collect { event ->
+                refreshTrackingResponseJob?.cancel()
+                refreshTrackingResponseJob = null
+            }
+        }
     }
 
     private fun continuouslyFetchTrackingDataJob() = mainScope.launch {
@@ -86,16 +90,6 @@ internal class DefaultMediaTailorSession(
             }
             delay(4_000)
         }
-    }
-
-    private fun registerPlayerEvents() {
-        player.on(onSourceLoaded)
-        player.on(onSourceUnloaded)
-    }
-
-    private fun unregisterPlayerEvents() {
-        player.off(onSourceLoaded)
-        player.off(onSourceUnloaded)
     }
 
     override suspend fun initialize(
@@ -167,7 +161,6 @@ internal class DefaultMediaTailorSession(
     }
 
     override fun dispose() {
-        unregisterPlayerEvents()
         _trackingUrl.update { null }
         mainScope.cancel()
     }

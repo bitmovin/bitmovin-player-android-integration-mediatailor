@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.mediatailor
+package com.bitmovin.player.integration.mediatailor.model
 
 import com.bitmovin.player.api.advertising.AdBreak
 import com.bitmovin.player.api.advertising.AdData
