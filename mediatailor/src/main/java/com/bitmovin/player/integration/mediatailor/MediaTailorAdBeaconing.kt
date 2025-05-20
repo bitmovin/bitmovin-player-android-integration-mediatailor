@@ -3,14 +3,13 @@ package com.bitmovin.player.integration.mediatailor
 import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
-import com.bitmovin.player.integration.mediatailor.util.Disposable
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingEvent
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
+import com.bitmovin.player.integration.mediatailor.util.Disposable
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 private const val TAG = "AdBeaconing"
@@ -47,19 +46,26 @@ internal class DefaultMediaTailorAdBeaconing(
             }
         }
         scope.launch {
-            combine(
-                player.eventFlow<PlayerEvent.Muted>(),
-                player.eventFlow<PlayerEvent.Unmuted>(),
-            ) {
-            }
+            player.eventFlow<PlayerEvent.Muted>().collect { track("mute") }
+        }
+        scope.launch {
+            player.eventFlow<PlayerEvent.Unmuted>().collect { track("unmute") }
+        }
+        scope.launch {
+            player.eventFlow<PlayerEvent.Play>().collect { track("resume") }
+        }
+        scope.launch {
+            player.eventFlow<PlayerEvent.Paused>().collect { track("pause") }
+        }
+        scope.launch {
+            player.eventFlow<PlayerEvent.FullscreenEnter>().collect { track("fullscreen") }
+        }
+        scope.launch {
+            player.eventFlow<PlayerEvent.FullscreenExit>().collect { track("exitFullscreen") }
         }
     }
 
     override fun track(eventType: String) {
-        trackIfPresent(eventType)
-    }
-
-    private fun trackIfPresent(eventType: String) {
         val ad = adPlaybackTracker.adProgress.value?.ad ?: return
 
         ad.trackingEvents
@@ -94,4 +100,5 @@ private val linearAdMetricEventTypes = setOf(
     "thirdQuartile",
     "complete",
     "progress",
+    "impression",
 )

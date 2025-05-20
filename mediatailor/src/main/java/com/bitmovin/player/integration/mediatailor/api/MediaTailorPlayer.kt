@@ -31,7 +31,6 @@ class MediaTailorPlayer(
         }
     }
 
-
     override fun destroy() {
         mediaTailorSessionManager.dispose()
         scope.cancel()

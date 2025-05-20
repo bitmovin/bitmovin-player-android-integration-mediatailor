@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 private const val TAG = "AdPlaybackTracker"
 
 public data class AdProgress(
-    val adBreak: MediaTailorAdBreak,
     val ad: MediaTailorLinearAd,
     val progress: Double,
 )
@@ -49,16 +48,24 @@ internal class DefaultMediaTailorAdPlaybackTracker(
         get() = _adProgress
 
     init {
+        findAdBreaksIfNeeded()
+        scope.launch {
+            player.eventFlow<PlayerEvent.Seeked>().collect {
+                _nextAdBreak.update { null }
+                _currentAdBreak.update { null }
+                findAdBreaksIfNeeded()
+            }
+        }
         scope.launch {
             mediaTailorSession.adBreaks.collect { adBreaks ->
-                updateNextAdBreak()
+                findAdBreaksIfNeeded()
             }
         }
         scope.launch {
             player.eventFlow<PlayerEvent.TimeChanged>().collect {
-                updateNextAndCurrentAdBreaksIfNeeded()
-                updateCurrentAdIfNeeded()
-                trackAdPlayback()
+                trackAdBreaks()
+                _currentAdBreak.value.updateCurrentAdIfNeeded()
+                _currentAd.value.trackAdPlayback()
             }
         }
     }
@@ -66,7 +73,7 @@ internal class DefaultMediaTailorAdPlaybackTracker(
     /**
      * Next ad break makes sense to update only every time the ad breaks is updated
      */
-    private fun updateNextAdBreak() {
+    private fun findAdBreaksIfNeeded() {
         val nextAdBreak = _nextAdBreak.value
         when {
             nextAdBreak == null -> {
@@ -87,7 +94,7 @@ internal class DefaultMediaTailorAdPlaybackTracker(
      * To avoid searching for current ad break on every player time update we track the next
      * ad break and then continuously check if we reached it yet.
      */
-    private fun updateNextAndCurrentAdBreaksIfNeeded() {
+    private fun trackAdBreaks() {
         val nextAdBreak = _nextAdBreak.value
         val currentAdBreak = _currentAdBreak.value
         when {
@@ -106,18 +113,15 @@ internal class DefaultMediaTailorAdPlaybackTracker(
             }
 
             // We passed the current ad break
-            currentAdBreak != null && player.currentTime > currentAdBreak.endTime -> {
+            currentAdBreak != null && currentAdBreak.endTime < player.currentTime -> {
                 // We finished the current ad break
                 _currentAdBreak.update { null }
             }
         }
     }
 
-    /**
-     * Current ad is always based on current ad break.
-     */
-    private fun updateCurrentAdIfNeeded() {
-        val currentAdBreak = _currentAdBreak.value
+    private fun MediaTailorAdBreak?.updateCurrentAdIfNeeded() {
+        val currentAdBreak = this
         if (currentAdBreak != null) {
             val currentAd = _currentAd.value
             if (currentAd == null || player.currentTime !in currentAd.startToEndTime) {
@@ -129,16 +133,14 @@ internal class DefaultMediaTailorAdPlaybackTracker(
         }
     }
 
-    private fun trackAdPlayback() {
-        val currentAdBreak = _currentAdBreak.value ?: return
-        val currentAd = _currentAd.value ?: return
+    private fun MediaTailorLinearAd?.trackAdPlayback() {
+        val currentAd = this ?: return
 
         val currentAdTime = player.currentTime - currentAd.scheduleTime
         val progress = currentAdTime / currentAd.duration
 
         _adProgress.update {
             AdProgress(
-                adBreak = currentAdBreak,
                 ad = currentAd,
                 progress = progress,
             )
@@ -146,7 +148,7 @@ internal class DefaultMediaTailorAdPlaybackTracker(
 
         Log.i(
             TAG,
-            "Ad progress: $progress, currentAdTime: $currentAdTime, duration: ${currentAdBreak.duration}"
+            "Ad progress: $progress, currentAdTime: $currentAdTime"
         )
     }
 

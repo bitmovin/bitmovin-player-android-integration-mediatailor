@@ -3,6 +3,7 @@ package com.bitmovin.player.integration.mediatailor
 import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.SourceEvent
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorAssetType
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorSessionInitializationResponse
@@ -38,6 +39,7 @@ internal class DefaultMediaTailorSession(
     private val player: Player,
     private val httpClient: HttpClient,
     private val adsMapper: MediaTailorAdsMapper,
+    private val config: MediaTailorSessionConfig,
 ) : MediaTailorSession {
     private val json = Json {
         ignoreUnknownKeys = true
@@ -67,11 +69,15 @@ internal class DefaultMediaTailorSession(
         }
         mainScope.launch {
             player.eventFlow<SourceEvent.Loaded>().collect { event ->
-                if (player.isLive) {
-                    refreshTrackingResponseJob?.cancel()
-                    refreshTrackingResponseJob = continuouslyFetchTrackingDataJob()
-                } else {
-                    mainScope.launch { fetchTrackingData() }
+                mainScope.launch { fetchTrackingData() }
+                when (val assetType = config.assetType) {
+                    MediaTailorAssetType.Vod -> mainScope.launch { fetchTrackingData() }
+                    is MediaTailorAssetType.Linear -> {
+                        refreshTrackingResponseJob?.cancel()
+                        refreshTrackingResponseJob = continuouslyFetchTrackingDataJob(
+                            assetType.trackingRequestPollFrequency
+                        )
+                    }
                 }
             }
         }
@@ -83,12 +89,16 @@ internal class DefaultMediaTailorSession(
         }
     }
 
-    private fun continuouslyFetchTrackingDataJob() = mainScope.launch {
+    private fun continuouslyFetchTrackingDataJob(
+        pollFrequencySeconds: Double
+    ) = mainScope.launch {
+        var initialFetchNeeded = true
         while (isActive) {
-            if (player.isPlaying) {
+            if (initialFetchNeeded || player.isPlaying) {
+                initialFetchNeeded = false
                 fetchTrackingData()
             }
-            delay(4_000)
+            delay((pollFrequencySeconds * 1000L).toLong())
         }
     }
 
@@ -124,7 +134,7 @@ internal class DefaultMediaTailorSession(
     private suspend fun requestTrackingData() {
         val trackingUrl = _trackingUrl.value ?: return
         val response = requestTrackingData(trackingUrl)
-        _trackingResponse.value = response
+        _trackingResponse.update { response }
     }
 
     /**
