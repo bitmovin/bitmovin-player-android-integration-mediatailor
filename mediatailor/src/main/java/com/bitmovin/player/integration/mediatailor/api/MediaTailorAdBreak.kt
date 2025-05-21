@@ -1,23 +1,23 @@
 package com.bitmovin.player.integration.mediatailor.api
 
 public class MediaTailorAdBreak(
-    val id: String,
-    val ads: List<MediaTailorLinearAd>,
-    val scheduleTime: Double,
-    val duration: Double,
+    public val id: String,
+    public val ads: List<MediaTailorLinearAd>,
+    public val scheduleTime: Double,
+    public val duration: Double,
 )
 
 public class MediaTailorLinearAd(
-    val id: String,
-    val scheduleTime: Double,
-    val duration: Double,
-    val trackingEvents: List<MediaTailorTrackingEvent>,
+    public val id: String,
+    public val scheduleTime: Double,
+    public val duration: Double,
+    public val trackingEvents: List<MediaTailorTrackingEvent>,
 )
 
 public class MediaTailorTrackingEvent(
-    val id: String,
-    val scheduleTime: Double,
-    val duration: Double,
-    val eventType: String,
-    val beaconUrls: List<String>,
+    public val id: String,
+    public val scheduleTime: Double,
+    public val duration: Double,
+    public val eventType: String,
+    public val beaconUrls: List<String>,
 )

@@ -24,7 +24,7 @@ import kotlinx.coroutines.withContext
  * Limitations: - Playlists,...
  */
 public class MediaTailorSessionManager(
-    val player: Player,
+    private val player: Player,
 ) {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val httpClient = DefaultHttpClient()

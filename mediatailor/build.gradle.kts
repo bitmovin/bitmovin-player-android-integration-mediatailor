@@ -36,16 +36,6 @@ android {
     }
 }
 
-/** Auto opt-in for InternalBitmovinApi */
-tasks.withType<KotlinJvmCompile>().all {
-    compilerOptions {
-        freeCompilerArgs.add("-opt-in=com.bitmovin.player.core.internal.InternalBitmovinApi")
-        freeCompilerArgs.add("-opt-in=com.bitmovin.player.core.internal.InternalPlayerApi")
-        freeCompilerArgs.add("-opt-in=com.bitmovin.player.base.internal.InternalBitmovinApi")
-        freeCompilerArgs.add("-opt-in=com.bitmovin.analytics.internal.InternalBitmovinApi")
-    }
-}
-
 dependencies {
     compileOnly(libs.bitmovin.player)
     compileOnly(libs.bitmovin.player.base)
@@ -57,4 +47,14 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+tasks.withType<KotlinJvmCompile>().all {
+    if (this.name.contains("Test")) return@all
+
+    compilerOptions.allWarningsAsErrors.set(true)
+    compilerOptions {
+        // Enable explicit API for production code
+        freeCompilerArgs.add("-Xexplicit-api=strict")
+    }
 }

@@ -1,11 +1,11 @@
 package com.bitmovin.player.integration.mediatailor.api
 
 public sealed class SessionInitializationResult {
-    class Success(
-        val manifestUrl: String,
+    public class Success(
+        public val manifestUrl: String,
     ) : SessionInitializationResult()
 
-    class Failure(
-        val message: String?,
+    public class Failure(
+        public val message: String?,
     ) : SessionInitializationResult()
 }
