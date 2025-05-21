@@ -10,11 +10,12 @@ import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 private const val TAG = "AdBeaconing"
 
-interface MediaTailorAdBeaconing : Disposable {
+internal interface MediaTailorAdBeaconing : Disposable {
     fun track(eventType: String)
 }
 
@@ -34,34 +35,31 @@ internal class DefaultMediaTailorAdBeaconing(
                 ad.trackingEvents
                     .filter { player.currentTime in it.paddedStartTime }
                     .filter { it.isLinearAdMetric }
-                    .forEach {
-                        if (firedTrackingEvents.contains(it.id)) {
+                    .forEach { trackingEvent ->
+                        if (trackingEvent.id in firedTrackingEvents) {
                             return@forEach
                         }
-                        firedTrackingEvents.add(it.id)
+                        firedTrackingEvents.add(trackingEvent.id)
 
-                        Log.d(TAG, "Tracking event: ${it.eventType}")
-                        it.beaconUrls.forEach { launch { httpClient.get(it) } }
+                        Log.d(TAG, "Tracking event: ${trackingEvent.eventType}")
+                        trackingEvent.beaconUrls.forEach { launch { httpClient.get(it) } }
                     }
             }
         }
         scope.launch {
-            player.eventFlow<PlayerEvent.Muted>().collect { track("mute") }
-        }
-        scope.launch {
-            player.eventFlow<PlayerEvent.Unmuted>().collect { track("unmute") }
-        }
-        scope.launch {
-            player.eventFlow<PlayerEvent.Play>().collect { track("resume") }
-        }
-        scope.launch {
-            player.eventFlow<PlayerEvent.Paused>().collect { track("pause") }
-        }
-        scope.launch {
-            player.eventFlow<PlayerEvent.FullscreenEnter>().collect { track("fullscreen") }
-        }
-        scope.launch {
-            player.eventFlow<PlayerEvent.FullscreenExit>().collect { track("exitFullscreen") }
+            merge(
+                player.eventFlow<PlayerEvent.Muted>(),
+                player.eventFlow<PlayerEvent.Unmuted>(),
+                player.eventFlow<PlayerEvent.Play>(),
+                player.eventFlow<PlayerEvent.Paused>(),
+                player.eventFlow<PlayerEvent.FullscreenEnter>(),
+                player.eventFlow<PlayerEvent.FullscreenExit>(),
+            ).collect { event ->
+                val trackingEvent = playerToTrackingEvents[event::class]
+                if (trackingEvent != null) {
+                    track(trackingEvent)
+                }
+            }
         }
     }
 
@@ -85,7 +83,7 @@ internal class DefaultMediaTailorAdBeaconing(
 }
 
 private val MediaTailorTrackingEvent.isLinearAdMetric: Boolean
-    get() = linearAdMetricEventTypes.contains(eventType)
+    get() = eventType in linearAdMetricEventTypes
 
 // Player updates time every 0.2 seconds or so, so we need to account for this inaccuracy
 // when checking if the tracking event should be fired
@@ -101,4 +99,13 @@ private val linearAdMetricEventTypes = setOf(
     "complete",
     "progress",
     "impression",
+)
+
+private val playerToTrackingEvents = mapOf(
+    PlayerEvent.Muted::class to "mute",
+    PlayerEvent.Unmuted::class to "unmute",
+    PlayerEvent.Play::class to "resume",
+    PlayerEvent.Paused::class to "pause",
+    PlayerEvent.FullscreenEnter::class to "fullscreen",
+    PlayerEvent.FullscreenExit::class to "exitFullscreen",
 )
