@@ -3,8 +3,9 @@ package com.bitmovin.player.integration.mediatailor
 import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
-import com.bitmovin.player.integration.mediatailor.model.MediaTailorAdBreak
-import com.bitmovin.player.integration.mediatailor.model.MediaTailorLinearAd
+import com.bitmovin.player.integration.mediatailor.api.AdProgress
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
 import com.bitmovin.player.integration.mediatailor.util.Disposable
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import kotlinx.coroutines.CoroutineScope
@@ -17,12 +18,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "AdPlaybackTracker"
 
-public data class AdProgress(
-    val ad: MediaTailorLinearAd,
-    val progress: Double,
-)
-
-interface MediaTailorAdPlaybackTracker : Disposable {
+internal interface MediaTailorAdPlaybackTracker : Disposable {
     val nextAdBreak: StateFlow<MediaTailorAdBreak?>
     val currentAdBreak: StateFlow<MediaTailorAdBreak?>
     val adProgress: StateFlow<AdProgress?>

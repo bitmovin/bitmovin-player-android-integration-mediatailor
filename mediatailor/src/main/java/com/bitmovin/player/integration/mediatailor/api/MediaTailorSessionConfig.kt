@@ -1,22 +1,25 @@
 package com.bitmovin.player.integration.mediatailor.api
 
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+
 public data class MediaTailorSessionConfig(
     /**
      * Url to the MediaTailor explicit session initialization endpoint.
      *
      * Reference: https://docs.aws.amazon.com/mediatailor/latest/ug/ad-reporting-client-side.html
      */
-    val sessionInitUrl: String,
+    public val sessionInitUrl: String,
     /**
      * Optional session initialization parameters.
      *
      * Reference: https://docs.aws.amazon.com/mediatailor/latest/ug/manifest-query-parameters-hls-and-dash-explicit-session-initialization.html
      */
-    val sessionInitParams: Map<String, Any> = emptyMap(),
+    public val sessionInitParams: Map<String, Any> = emptyMap(),
     /**
      * The asset type of the MediaTailor session.
      */
-    val assetType: MediaTailorAssetType,
+    public val assetType: MediaTailorAssetType,
 )
 
 public sealed class MediaTailorAssetType {
@@ -30,10 +33,20 @@ public sealed class MediaTailorAssetType {
      */
     public class Linear(
         /**
-         * The interval in seconds at which the TrackingUrl is polled.
-         *
-         * Reference: https://docs.aws.amazon.com/mediatailor/latest/ug/ad-reporting-client-side.html#ad-reporting-client-side-best-practices
+         * The configuration for the linear asset.
          */
-        val trackingRequestPollFrequency: Double = 4.0
+        public val config: LinearAssetTypeConfig = LinearAssetTypeConfig(),
     ) : MediaTailorAssetType()
 }
+
+/**
+ * Configuration for the linear asset types.
+ */
+public class LinearAssetTypeConfig(
+    /**
+     * The interval in seconds at which the TrackingUrl is polled.
+     *
+     * Reference: https://docs.aws.amazon.com/mediatailor/latest/ug/ad-reporting-client-side.html#ad-reporting-client-side-best-practices
+     */
+    public val trackingRequestPollFrequency: Duration = 4.seconds,
+)

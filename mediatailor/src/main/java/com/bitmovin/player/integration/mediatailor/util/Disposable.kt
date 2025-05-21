@@ -1,5 +1,5 @@
 package com.bitmovin.player.integration.mediatailor.util
 
-interface Disposable {
+internal interface Disposable {
     fun dispose()
 }

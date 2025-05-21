@@ -3,7 +3,7 @@ package com.bitmovin.player.integration.mediatailor
 import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
-import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingEvent
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorTrackingEvent
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
 import com.bitmovin.player.integration.mediatailor.util.Disposable
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
@@ -88,7 +88,7 @@ private val MediaTailorTrackingEvent.isLinearAdMetric: Boolean
 // Player updates time every 0.2 seconds or so, so we need to account for this inaccuracy
 // when checking if the tracking event should be fired
 private val MediaTailorTrackingEvent.paddedStartTime: ClosedRange<Double>
-    get() = startTime - 0.3..startTime + 0.3
+    get() = scheduleTime - 0.3..scheduleTime + 0.3
 
 private val linearAdMetricEventTypes = setOf(
     "loaded",
