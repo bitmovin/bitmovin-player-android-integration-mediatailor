@@ -28,8 +28,6 @@ import okio.IOException
 import java.net.URI
 import kotlin.time.Duration
 
-private const val TAG = "MediaTailorSession"
-
 internal interface MediaTailorSession : Disposable {
     suspend fun initialize(sessionConfig: MediaTailorSessionConfig): SessionInitializationResult
     val isInitialized: Boolean

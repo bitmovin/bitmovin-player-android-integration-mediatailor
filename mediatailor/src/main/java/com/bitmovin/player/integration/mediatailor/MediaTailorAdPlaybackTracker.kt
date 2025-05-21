@@ -1,9 +1,7 @@
 package com.bitmovin.player.integration.mediatailor
 
-import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
-import com.bitmovin.player.integration.mediatailor.api.AdProgress
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
 import com.bitmovin.player.integration.mediatailor.util.Disposable
@@ -13,15 +11,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-private const val TAG = "AdPlaybackTracker"
+internal data class CurrentAd(
+    val ad: MediaTailorLinearAd,
+    val progress: Double,
+)
 
 internal interface MediaTailorAdPlaybackTracker : Disposable {
     val nextAdBreak: StateFlow<MediaTailorAdBreak?>
     val currentAdBreak: StateFlow<MediaTailorAdBreak?>
-    val adProgress: StateFlow<AdProgress?>
+    val currentAd: StateFlow<CurrentAd?>
 }
 
 internal class DefaultMediaTailorAdPlaybackTracker(
@@ -32,7 +34,7 @@ internal class DefaultMediaTailorAdPlaybackTracker(
     private val _nextAdBreak = MutableStateFlow<MediaTailorAdBreak?>(null)
     private val _currentAdBreak = MutableStateFlow<MediaTailorAdBreak?>(null)
     private val _currentAd = MutableStateFlow<MediaTailorLinearAd?>(null)
-    private val _adProgress = MutableStateFlow<AdProgress?>(null)
+    private val _adProgress = MutableStateFlow<CurrentAd?>(null)
 
     override val nextAdBreak: StateFlow<MediaTailorAdBreak?>
         get() = _nextAdBreak
@@ -40,13 +42,16 @@ internal class DefaultMediaTailorAdPlaybackTracker(
     override val currentAdBreak: StateFlow<MediaTailorAdBreak?>
         get() = _currentAdBreak
 
-    override val adProgress: StateFlow<AdProgress?>
+    override val currentAd: StateFlow<CurrentAd?>
         get() = _adProgress
 
     init {
         findAdBreaksIfNeeded()
         scope.launch {
-            player.eventFlow<PlayerEvent.Seeked>().collect {
+            merge(
+                player.eventFlow<PlayerEvent.TimeShifted>(),
+                player.eventFlow<PlayerEvent.Seeked>(),
+            ).collect {
                 _nextAdBreak.update { null }
                 _currentAdBreak.update { null }
                 findAdBreaksIfNeeded()
@@ -136,16 +141,11 @@ internal class DefaultMediaTailorAdPlaybackTracker(
         val progress = currentAdTime / currentAd.duration
 
         _adProgress.update {
-            AdProgress(
+            CurrentAd(
                 ad = currentAd,
                 progress = progress,
             )
         }
-
-        Log.i(
-            TAG,
-            "Ad progress: $progress, currentAdTime: $currentAdTime"
-        )
     }
 
     private fun findNextAdBreak(): MediaTailorAdBreak? = mediaTailorSession.adBreaks.value.find {

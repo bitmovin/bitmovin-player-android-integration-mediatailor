@@ -17,7 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitmovin.player.api.DebugConfig
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.source.SourceConfig
-import com.bitmovin.player.integration.mediatailor.api.MediaTailorAssetType.Linear
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorAssetType
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionManager
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
                             val sessionInitResult = mediaTailorSessionManager.initializeSession(
                                 MediaTailorSessionConfig(
                                     sessionInitUrl = "https://awslive.streamco.video/v1/session/86dfd1144b3bf786fc967f2c3876972e5548ca5d/awslive/out/v1/live/jdub-live-bitmovin01/cmaf-cbcs/hls.m3u8",
-                                    assetType = Linear(),
+                                    assetType = MediaTailorAssetType.Linear(),
                                 )
                             )
                             when (val sessionInitResult = sessionInitResult) {
@@ -61,9 +62,44 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
+                        scope.launch {
+                            mediaTailorSessionManager.events.collect { event ->
+                                when (event) {
+                                    is MediaTailorEvent.AdBreakStarted -> {
+                                        Log.d("MainActivity", "AdBreak started: ${event}")
+                                    }
+
+                                    is MediaTailorEvent.AdBreakFinished -> {
+                                        Log.d("MainActivity", "AdBreak ended: ${event}")
+                                    }
+
+                                    is MediaTailorEvent.AdStarted -> {
+                                        Log.d("MainActivity", "Ad started: ${event}")
+                                    }
+
+                                    is MediaTailorEvent.AdFinished -> {
+                                        Log.d("MainActivity", "Ad ended: ${event}")
+                                    }
+
+                                    is MediaTailorEvent.Info -> {
+                                        Log.i("MainActivity", "Info: ${event.message}")
+                                    }
+
+                                    is MediaTailorEvent.Error -> {
+                                        Log.e("MainActivity", "Error: ${event.message}")
+                                    }
+
+                                    is MediaTailorEvent.UpcomingAdBreakUpdate -> {
+                                        Log.d("MainActivity", "Upcoming ad break: ${event.adBreak}")
+                                    }
+
+                                    else -> Unit
+                                }
+                            }
+                        }
 
                         onDispose {
-                            mediaTailorSessionManager.dispose()
+                            mediaTailorSessionManager.destroy()
                             player.destroy()
                         }
                     }

@@ -1,8 +1,8 @@
 package com.bitmovin.player.integration.mediatailor
 
-import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorTrackingEvent
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
 import com.bitmovin.player.integration.mediatailor.util.Disposable
@@ -13,8 +13,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
-private const val TAG = "AdBeaconing"
-
 internal interface MediaTailorAdBeaconing : Disposable {
     fun track(eventType: String)
 }
@@ -23,13 +21,14 @@ internal class DefaultMediaTailorAdBeaconing(
     val player: Player,
     val adPlaybackTracker: MediaTailorAdPlaybackTracker,
     val httpClient: HttpClient,
+    val eventEmitter: EventEmitter,
 ) : MediaTailorAdBeaconing {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val firedTrackingEvents = mutableSetOf<String>()
 
     init {
         scope.launch {
-            adPlaybackTracker.adProgress.collect { adProgress ->
+            adPlaybackTracker.currentAd.collect { adProgress ->
                 val ad = adProgress?.ad ?: return@collect
 
                 ad.trackingEvents
@@ -41,7 +40,7 @@ internal class DefaultMediaTailorAdBeaconing(
                         }
                         firedTrackingEvents.add(trackingEvent.id)
 
-                        Log.d(TAG, "Tracking event: ${trackingEvent.eventType}")
+                        eventEmitter.emit(MediaTailorEvent.Info("Tracking event: ${trackingEvent.eventType}"))
                         trackingEvent.beaconUrls.forEach { launch { httpClient.get(it) } }
                     }
             }
@@ -64,12 +63,12 @@ internal class DefaultMediaTailorAdBeaconing(
     }
 
     override fun track(eventType: String) {
-        val ad = adPlaybackTracker.adProgress.value?.ad ?: return
+        val ad = adPlaybackTracker.currentAd.value?.ad ?: return
 
         ad.trackingEvents
             .find { it.eventType == eventType }
             ?.also {
-                Log.d(TAG, "Tracking event: $eventType")
+                eventEmitter.emit(MediaTailorEvent.Info("Tracking event: $eventType"))
             }
             ?.beaconUrls
             ?.forEach {
