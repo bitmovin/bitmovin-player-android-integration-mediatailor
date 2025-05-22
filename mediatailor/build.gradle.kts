@@ -34,6 +34,11 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 dependencies {
@@ -44,7 +49,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
-    testImplementation(libs.junit)
+    testImplementation(libs.bitmovin.player)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotest)
     testImplementation(libs.mockk.core)

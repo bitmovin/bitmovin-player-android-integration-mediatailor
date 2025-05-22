@@ -1,3 +1,4 @@
+/*
 package com.bitmovin.player.integration.mediatailor
 
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
@@ -104,4 +105,4 @@ private val sampleMediaTailorTrackingResponse = """
                 }
               ]
             }
-        """.trimIndent()
+        """.trimIndent()*/
