@@ -1,5 +1,6 @@
 package com.bitmovin.player.integration.mediatailor.eventEmitter
 
+import android.util.Log
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

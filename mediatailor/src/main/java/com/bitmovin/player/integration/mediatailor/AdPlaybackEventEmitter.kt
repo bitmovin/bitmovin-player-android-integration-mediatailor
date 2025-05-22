@@ -39,38 +39,38 @@ internal class DefaultAdPlaybackEventEmitter(
                 }
                 previousAdBreak = newAdBreak
             }
-            scope.launch {
-                adPlaybackTracker.currentAd.collect { adProgress ->
-                    when {
-                        previousAd == null && adProgress?.ad != null -> {
-                            eventEmitter.emit(MediaTailorEvent.AdStarted(adProgress.ad))
-                        }
-
-                        previousAd != null && adProgress?.ad == null -> {
-                            eventEmitter.emit(MediaTailorEvent.AdFinished(previousAd!!))
-                        }
-
-                        previousAd != null && adProgress?.ad != null && previousAd!!.id != adProgress.ad.id -> {
-                            eventEmitter.emit(MediaTailorEvent.AdFinished(previousAd!!))
-                            eventEmitter.emit(MediaTailorEvent.AdStarted(adProgress.ad))
-                        }
-
-                        adProgress != null -> {
-                            eventEmitter.emit(
-                                MediaTailorEvent.AdProgress(
-                                    adProgress.ad,
-                                    adProgress.progress
-                                )
-                            )
-                        }
+        }
+        scope.launch {
+            adPlaybackTracker.currentAd.collect { adProgress ->
+                when {
+                    previousAd == null && adProgress?.ad != null -> {
+                        eventEmitter.emit(MediaTailorEvent.AdStarted(adProgress.ad))
                     }
-                    previousAd = adProgress?.ad
+
+                    previousAd != null && adProgress?.ad == null -> {
+                        eventEmitter.emit(MediaTailorEvent.AdFinished(previousAd!!))
+                    }
+
+                    previousAd != null && adProgress?.ad != null && previousAd!!.id != adProgress.ad.id -> {
+                        eventEmitter.emit(MediaTailorEvent.AdFinished(previousAd!!))
+                        eventEmitter.emit(MediaTailorEvent.AdStarted(adProgress.ad))
+                    }
+
+                    adProgress != null -> {
+                        eventEmitter.emit(
+                            MediaTailorEvent.AdProgress(
+                                adProgress.ad,
+                                adProgress.progress
+                            )
+                        )
+                    }
                 }
+                previousAd = adProgress?.ad
             }
-            scope.launch {
-                adPlaybackTracker.nextAdBreak.collect { nextAdBreak ->
-                    eventEmitter.emit(MediaTailorEvent.UpcomingAdBreakUpdate(nextAdBreak))
-                }
+        }
+        scope.launch {
+            adPlaybackTracker.nextAdBreak.collect { nextAdBreak ->
+                eventEmitter.emit(MediaTailorEvent.UpcomingAdBreakUpdate(nextAdBreak))
             }
         }
     }
