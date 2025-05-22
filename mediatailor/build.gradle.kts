@@ -38,13 +38,19 @@ android {
 
 dependencies {
     compileOnly(libs.bitmovin.player)
-    compileOnly(libs.bitmovin.player.base)
     implementation(libs.kotlinx.serialization.json)
-
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotest)
+    testImplementation(libs.mockk.core)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.strikt.core)
+    testImplementation(libs.strikt.mockk)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

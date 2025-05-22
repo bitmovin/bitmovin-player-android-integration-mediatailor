@@ -52,7 +52,7 @@ internal class DefaultMediaTailorSession(
 
     init {
         mainScope.launch {
-            player.eventFlow<SourceEvent.Loaded>().collect { event ->
+            player.eventFlow<SourceEvent.Loaded>().collect {
                 when (val assetType = config.assetType) {
                     MediaTailorAssetType.Vod -> mainScope.launch { fetchTrackingData() }
                     is MediaTailorAssetType.Linear -> {
@@ -65,7 +65,7 @@ internal class DefaultMediaTailorSession(
             }
         }
         mainScope.launch {
-            player.eventFlow<SourceEvent.Unloaded>().collect { event ->
+            player.eventFlow<SourceEvent.Unloaded>().collect {
                 refreshTrackingResponseJob?.cancel()
                 refreshTrackingResponseJob = null
             }

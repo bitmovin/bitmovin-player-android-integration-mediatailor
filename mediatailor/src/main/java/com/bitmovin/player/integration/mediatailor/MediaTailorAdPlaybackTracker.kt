@@ -58,7 +58,7 @@ internal class DefaultMediaTailorAdPlaybackTracker(
             }
         }
         scope.launch {
-            mediaTailorSession.adBreaks.collect { adBreaks ->
+            mediaTailorSession.adBreaks.collect {
                 findAdBreaksIfNeeded()
             }
         }
@@ -75,9 +75,9 @@ internal class DefaultMediaTailorAdPlaybackTracker(
      * Next ad break makes sense to update only every time the ad breaks is updated
      */
     private fun findAdBreaksIfNeeded() {
-        val nextAdBreak = _nextAdBreak.value
+        val currentNextAdBreak = _nextAdBreak.value
         when {
-            nextAdBreak == null -> {
+            currentNextAdBreak == null -> {
                 // TODO: What if we are in current ad break and also have next ad break?
                 val nextAdBreak = findNextAdBreak()
                 if (nextAdBreak == null) {
