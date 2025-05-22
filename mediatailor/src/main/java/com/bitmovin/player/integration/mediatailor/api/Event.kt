@@ -6,36 +6,36 @@ public sealed class MediaTailorEvent(
      */
     public val timestamp: Long = System.currentTimeMillis()
 ) {
-    public data class AdStarted(
-        val ad: MediaTailorLinearAd,
+    public class AdStarted(
+        public val ad: MediaTailorLinearAd,
     ) : MediaTailorEvent()
 
-    public data class AdProgress(
-        val ad: MediaTailorLinearAd,
-        val progress: Double,
+    public class AdProgress(
+        public val ad: MediaTailorLinearAd,
+        public val progress: Double,
     ) : MediaTailorEvent()
 
-    public data class AdFinished(
-        val ad: MediaTailorLinearAd,
+    public class AdFinished(
+        public val ad: MediaTailorLinearAd,
     ) : MediaTailorEvent()
 
-    public data class AdBreakStarted(
-        val adBreak: MediaTailorAdBreak,
+    public class AdBreakStarted(
+        public val adBreak: MediaTailorAdBreak,
     ) : MediaTailorEvent()
 
-    public data class AdBreakFinished(
-        val adBreak: MediaTailorAdBreak,
+    public class AdBreakFinished(
+        public val adBreak: MediaTailorAdBreak,
     ) : MediaTailorEvent()
 
-    public data class UpcomingAdBreakUpdate(
-        val adBreak: MediaTailorAdBreak?,
+    public class UpcomingAdBreakUpdate(
+        public val adBreak: MediaTailorAdBreak?,
     ) : MediaTailorEvent()
 
-    public data class Info(
-        val message: String,
+    public class Info(
+        public val message: String,
     ) : MediaTailorEvent()
 
-    public data class Error(
-        val message: String,
+    public class Error(
+        public val message: String,
     ) : MediaTailorEvent()
 }

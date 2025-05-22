@@ -154,7 +154,6 @@ internal class DefaultMediaTailorSession(
 
     override fun dispose() {
         _trackingUrl.update { null }
-        _adBreaks.update { emptyList() }
         mainScope.cancel()
     }
 }

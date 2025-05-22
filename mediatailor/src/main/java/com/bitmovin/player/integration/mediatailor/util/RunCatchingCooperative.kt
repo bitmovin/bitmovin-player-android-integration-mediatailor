@@ -14,6 +14,7 @@ internal inline fun <R> runCatchingCooperative(block: () -> R): Result<R> {
         Result.success(block())
     } catch (c: CancellationException) {
         throw c
+        // TODO: Maybe make this only catch Exceptions
     } catch (e: Throwable) {
         Result.failure(e)
     }

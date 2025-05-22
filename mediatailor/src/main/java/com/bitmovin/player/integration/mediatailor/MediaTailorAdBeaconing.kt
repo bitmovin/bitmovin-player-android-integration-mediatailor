@@ -4,6 +4,7 @@ import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorTrackingEvent
+import com.bitmovin.player.integration.mediatailor.eventEmitter.InternalEventEmitter
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
 import com.bitmovin.player.integration.mediatailor.util.Disposable
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
@@ -21,13 +22,15 @@ internal class DefaultMediaTailorAdBeaconing(
     val player: Player,
     val adPlaybackTracker: MediaTailorAdPlaybackTracker,
     val httpClient: HttpClient,
-    val eventEmitter: EventEmitter,
+    val eventEmitter: InternalEventEmitter,
 ) : MediaTailorAdBeaconing {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val firedTrackingEvents = mutableSetOf<String>()
 
     init {
         scope.launch {
+            // TODO: currentAd might not be needed - check with the UI requirements
+            // TODO: Check if it's ok track E.g. third quartile if we skipped start and midpoint
             adPlaybackTracker.currentAd.collect { adProgress ->
                 val ad = adProgress?.ad ?: return@collect
 

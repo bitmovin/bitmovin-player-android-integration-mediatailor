@@ -3,18 +3,19 @@ package com.bitmovin.player.integration.mediatailor
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
+import com.bitmovin.player.integration.mediatailor.eventEmitter.InternalEventEmitter
 import com.bitmovin.player.integration.mediatailor.util.Disposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-internal interface AdPlaybackProcessor : Disposable
+internal interface AdPlaybackEventEmitter : Disposable
 
-internal class DefaultAdPlaybackProcessor(
+internal class DefaultAdPlaybackEventEmitter(
     private val adPlaybackTracker: MediaTailorAdPlaybackTracker,
-    private val eventEmitter: EventEmitter,
-) : AdPlaybackProcessor {
+    private val eventEmitter: InternalEventEmitter,
+) : AdPlaybackEventEmitter {
     private val scope = CoroutineScope(Dispatchers.Main)
     private var previousAdBreak: MediaTailorAdBreak? = null
     private var previousAd: MediaTailorLinearAd? = null
@@ -75,6 +76,8 @@ internal class DefaultAdPlaybackProcessor(
     }
 
     override fun dispose() {
+        previousAdBreak = null
+        previousAd = null
         scope.cancel()
     }
 }

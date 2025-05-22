@@ -78,6 +78,7 @@ internal class DefaultMediaTailorAdPlaybackTracker(
         val nextAdBreak = _nextAdBreak.value
         when {
             nextAdBreak == null -> {
+                // TODO: What if we are in current ad break and also have next ad break?
                 val nextAdBreak = findNextAdBreak()
                 if (nextAdBreak == null) {
                     // We might have joined the stream in the middle of an ad break
@@ -114,7 +115,7 @@ internal class DefaultMediaTailorAdPlaybackTracker(
             }
 
             // We passed the current ad break
-            currentAdBreak != null && currentAdBreak.endTime < player.currentTime -> {
+            currentAdBreak != null && player.currentTime !in currentAdBreak.startToEndTime -> {
                 // We finished the current ad break
                 _currentAdBreak.update { null }
             }

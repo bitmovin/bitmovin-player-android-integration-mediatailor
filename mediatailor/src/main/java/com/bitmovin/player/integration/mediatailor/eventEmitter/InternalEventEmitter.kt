@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.mediatailor
+package com.bitmovin.player.integration.mediatailor.eventEmitter
 
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import kotlinx.coroutines.CoroutineScope
@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
-internal interface EventEmitter {
+internal interface InternalEventEmitter {
     fun emit(event: MediaTailorEvent)
 }
 
-internal class FlowEventEmitter : EventEmitter {
+internal class FlowEventEmitter : InternalEventEmitter {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val _events = MutableSharedFlow<MediaTailorEvent>()
     val events: SharedFlow<MediaTailorEvent>
