@@ -3,12 +3,12 @@ package com.bitmovin.player.integration.mediatailor.api
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.integration.mediatailor.AdPlaybackEventEmitter
 import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackEventEmitter
-import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorAdBeaconing
-import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorAdPlaybackTracker
-import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorAdsMapper
+import com.bitmovin.player.integration.mediatailor.DefaultAdBeaconing
+import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackTracker
+import com.bitmovin.player.integration.mediatailor.DefaultAdsMapper
 import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSession
-import com.bitmovin.player.integration.mediatailor.MediaTailorAdBeaconing
-import com.bitmovin.player.integration.mediatailor.MediaTailorAdPlaybackTracker
+import com.bitmovin.player.integration.mediatailor.AdBeaconing
+import com.bitmovin.player.integration.mediatailor.AdPlaybackTracker
 import com.bitmovin.player.integration.mediatailor.MediaTailorSession
 import com.bitmovin.player.integration.mediatailor.eventEmitter.FlowEventEmitter
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
@@ -28,12 +28,12 @@ public class MediaTailorSessionManager(
 ) {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val httpClient = DefaultHttpClient()
-    private val adMapper = DefaultMediaTailorAdsMapper()
+    private val adMapper = DefaultAdsMapper()
     private val flowEventEmitter = FlowEventEmitter()
     private var session: MediaTailorSession? = null
-    private var adPlaybackTracker: MediaTailorAdPlaybackTracker? = null
+    private var adPlaybackTracker: AdPlaybackTracker? = null
     private var adPlaybackProcessor: AdPlaybackEventEmitter? = null
-    private var adBeaconing: MediaTailorAdBeaconing? = null
+    private var adBeaconing: AdBeaconing? = null
 
     public val events: Flow<MediaTailorEvent>
         get() = flowEventEmitter.events
@@ -67,7 +67,7 @@ public class MediaTailorSessionManager(
         val sessionInitResult = session.initialize(sessionConfig)
 
         if (sessionInitResult is SessionInitializationResult.Success) {
-            adPlaybackTracker = DefaultMediaTailorAdPlaybackTracker(
+            adPlaybackTracker = DefaultAdPlaybackTracker(
                 player,
                 session
             )
@@ -75,7 +75,7 @@ public class MediaTailorSessionManager(
                 adPlaybackTracker!!,
                 flowEventEmitter
             )
-            adBeaconing = DefaultMediaTailorAdBeaconing(
+            adBeaconing = DefaultAdBeaconing(
                 player,
                 adPlaybackTracker!!,
                 httpClient,

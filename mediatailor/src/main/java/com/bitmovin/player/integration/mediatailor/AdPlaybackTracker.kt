@@ -20,16 +20,16 @@ internal data class CurrentAd(
     val progress: Double,
 )
 
-internal interface MediaTailorAdPlaybackTracker : Disposable {
+internal interface AdPlaybackTracker : Disposable {
     val nextAdBreak: StateFlow<MediaTailorAdBreak?>
     val currentAdBreak: StateFlow<MediaTailorAdBreak?>
     val currentAd: StateFlow<CurrentAd?>
 }
 
-internal class DefaultMediaTailorAdPlaybackTracker(
+internal class DefaultAdPlaybackTracker(
     private val player: Player,
     private val mediaTailorSession: MediaTailorSession,
-) : MediaTailorAdPlaybackTracker {
+) : AdPlaybackTracker {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val _nextAdBreak = MutableStateFlow<MediaTailorAdBreak?>(null)
     private val _currentAdBreak = MutableStateFlow<MediaTailorAdBreak?>(null)

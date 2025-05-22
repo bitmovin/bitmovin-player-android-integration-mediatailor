@@ -37,7 +37,7 @@ internal interface MediaTailorSession : Disposable {
 internal class DefaultMediaTailorSession(
     private val player: Player,
     private val httpClient: HttpClient,
-    private val adsMapper: MediaTailorAdsMapper,
+    private val adsMapper: AdsMapper,
     private val config: MediaTailorSessionConfig,
 ) : MediaTailorSession {
     private val mainScope = CoroutineScope(Dispatchers.Main)

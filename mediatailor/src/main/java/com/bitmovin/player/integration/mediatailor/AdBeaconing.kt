@@ -14,16 +14,16 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
-internal interface MediaTailorAdBeaconing : Disposable {
+internal interface AdBeaconing : Disposable {
     fun track(eventType: String)
 }
 
-internal class DefaultMediaTailorAdBeaconing(
+internal class DefaultAdBeaconing(
     val player: Player,
-    val adPlaybackTracker: MediaTailorAdPlaybackTracker,
+    val adPlaybackTracker: AdPlaybackTracker,
     val httpClient: HttpClient,
     val eventEmitter: InternalEventEmitter,
-) : MediaTailorAdBeaconing {
+) : AdBeaconing {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val firedTrackingEvents = mutableSetOf<String>()
 

@@ -5,11 +5,11 @@ import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorTrackingEvent
 
-internal interface MediaTailorAdsMapper {
+internal interface AdsMapper {
     fun mapAdBreaks(avails: List<Avail>): List<MediaTailorAdBreak>
 }
 
-internal class DefaultMediaTailorAdsMapper : MediaTailorAdsMapper {
+internal class DefaultAdsMapper : AdsMapper {
     override fun mapAdBreaks(avails: List<Avail>): List<MediaTailorAdBreak> {
         return avails.map { avail ->
             MediaTailorAdBreak(

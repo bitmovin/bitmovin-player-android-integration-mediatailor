@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 internal interface AdPlaybackEventEmitter : Disposable
 
 internal class DefaultAdPlaybackEventEmitter(
-    private val adPlaybackTracker: MediaTailorAdPlaybackTracker,
+    private val adPlaybackTracker: AdPlaybackTracker,
     private val eventEmitter: InternalEventEmitter,
 ) : AdPlaybackEventEmitter {
     private val scope = CoroutineScope(Dispatchers.Main)
