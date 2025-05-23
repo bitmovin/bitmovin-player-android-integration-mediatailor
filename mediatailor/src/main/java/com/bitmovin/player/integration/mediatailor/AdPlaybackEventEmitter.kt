@@ -28,6 +28,12 @@ internal class DefaultAdPlaybackEventEmitter(
                 when {
                     previousPlayingAdBreak == null && playingAdBreak != null -> {
                         eventEmitter.emit(MediaTailorEvent.AdBreakStarted(playingAdBreak.adBreak))
+                        eventEmitter.emit(
+                            MediaTailorEvent.AdStarted(
+                                ad = playingAdBreak.ad,
+                                indexInQueue = playingAdBreak.adIndex
+                            )
+                        )
                     }
 
                     playingAdBreak != null && previousPlayingAdBreak?.ad?.id != playingAdBreak.ad.id -> {
