@@ -1,8 +1,6 @@
 package com.bitmovin.player.integration.mediatailor
 
-import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
-import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
 import com.bitmovin.player.integration.mediatailor.eventEmitter.InternalEventEmitter
 import com.bitmovin.player.integration.mediatailor.util.Disposable
 import kotlinx.coroutines.CoroutineScope
@@ -13,71 +11,50 @@ import kotlinx.coroutines.launch
 internal interface AdPlaybackEventEmitter : Disposable
 
 internal class DefaultAdPlaybackEventEmitter(
-    private val adPlaybackTracker: AdPlaybackTracker,
+    private val betterAdPlaybackTracker: AdPlaybackTracker,
     private val eventEmitter: InternalEventEmitter,
 ) : AdPlaybackEventEmitter {
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var previousAdBreak: MediaTailorAdBreak? = null
-    private var previousAd: MediaTailorLinearAd? = null
+    private var previousPlayingAdBreak: PlayingAdBreak? = null
 
     init {
         scope.launch {
-            adPlaybackTracker.currentAdBreak.collect { newAdBreak ->
-                when {
-                    previousAdBreak == null && newAdBreak != null -> {
-                        eventEmitter.emit(MediaTailorEvent.AdBreakStarted(newAdBreak))
-                    }
-
-                    previousAdBreak != null && newAdBreak == null -> {
-                        eventEmitter.emit(MediaTailorEvent.AdBreakFinished(previousAdBreak!!))
-                    }
-
-                    previousAdBreak != null && newAdBreak != null && previousAdBreak!!.id != newAdBreak.id -> {
-                        eventEmitter.emit(MediaTailorEvent.AdBreakFinished(previousAdBreak!!))
-                        eventEmitter.emit(MediaTailorEvent.AdBreakStarted(newAdBreak))
-                    }
-                }
-                previousAdBreak = newAdBreak
+            betterAdPlaybackTracker.nextAdBreak.collect {
+                eventEmitter.emit(MediaTailorEvent.UpcomingAdBreakUpdate(it))
             }
         }
         scope.launch {
-            adPlaybackTracker.currentAd.collect { adProgress ->
+            betterAdPlaybackTracker.playingAdBreak.collect { playingAdBreak ->
                 when {
-                    previousAd == null && adProgress?.ad != null -> {
-                        eventEmitter.emit(MediaTailorEvent.AdStarted(adProgress.ad))
+                    previousPlayingAdBreak == null && playingAdBreak != null -> {
+                        eventEmitter.emit(MediaTailorEvent.AdBreakStarted(playingAdBreak.adBreak))
                     }
 
-                    previousAd != null && adProgress?.ad == null -> {
-                        eventEmitter.emit(MediaTailorEvent.AdFinished(previousAd!!))
-                    }
-
-                    previousAd != null && adProgress?.ad != null && previousAd!!.id != adProgress.ad.id -> {
-                        eventEmitter.emit(MediaTailorEvent.AdFinished(previousAd!!))
-                        eventEmitter.emit(MediaTailorEvent.AdStarted(adProgress.ad))
-                    }
-
-                    adProgress != null -> {
+                    playingAdBreak != null && previousPlayingAdBreak?.ad?.id != playingAdBreak.ad.id -> {
+                        if (previousPlayingAdBreak?.ad != null) {
+                            eventEmitter.emit(MediaTailorEvent.AdFinished(previousPlayingAdBreak!!.ad))
+                        }
                         eventEmitter.emit(
-                            MediaTailorEvent.AdProgress(
-                                adProgress.ad,
-                                adProgress.progress
+                            MediaTailorEvent.AdStarted(
+                                ad = playingAdBreak.ad,
+                                indexInQueue = playingAdBreak.adIndex
                             )
                         )
                     }
+
+                    previousPlayingAdBreak != null && playingAdBreak == null -> {
+                        eventEmitter.emit(MediaTailorEvent.AdFinished(previousPlayingAdBreak!!.ad))
+                        eventEmitter.emit(MediaTailorEvent.AdBreakFinished(previousPlayingAdBreak!!.adBreak))
+                    }
                 }
-                previousAd = adProgress?.ad
-            }
-        }
-        scope.launch {
-            adPlaybackTracker.nextAdBreak.collect { nextAdBreak ->
-                eventEmitter.emit(MediaTailorEvent.UpcomingAdBreakUpdate(nextAdBreak))
+
+                previousPlayingAdBreak = playingAdBreak
             }
         }
     }
 
     override fun dispose() {
-        previousAdBreak = null
-        previousAd = null
+        previousPlayingAdBreak = null
         scope.cancel()
     }
 }

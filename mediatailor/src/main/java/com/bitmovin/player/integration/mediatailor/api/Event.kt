@@ -8,11 +8,10 @@ public sealed class MediaTailorEvent(
 ) {
     public class AdStarted(
         public val ad: MediaTailorLinearAd,
-    ) : MediaTailorEvent()
-
-    public class AdProgress(
-        public val ad: MediaTailorLinearAd,
-        public val progress: Double,
+        /**
+         * The index of the ad in the queue.
+         */
+        public val indexInQueue: Int,
     ) : MediaTailorEvent()
 
     public class AdFinished(
