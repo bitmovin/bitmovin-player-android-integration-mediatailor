@@ -10,6 +10,7 @@ import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSession
 import com.bitmovin.player.integration.mediatailor.AdBeaconing
 import com.bitmovin.player.integration.mediatailor.AdPlaybackTracker
 import com.bitmovin.player.integration.mediatailor.MediaTailorSession
+import com.bitmovin.player.integration.mediatailor.NewAdPlaybackTracker
 import com.bitmovin.player.integration.mediatailor.eventEmitter.FlowEventEmitter
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,7 @@ public class MediaTailorSessionManager(
     private val adMapper = DefaultAdsMapper()
     private val flowEventEmitter = FlowEventEmitter()
     private var session: MediaTailorSession? = null
+    private var newAdPlaybackTracker: AdPlaybackTracker? = null
     private var adPlaybackTracker: AdPlaybackTracker? = null
     private var adPlaybackProcessor: AdPlaybackEventEmitter? = null
     private var adBeaconing: AdBeaconing? = null
@@ -62,24 +64,28 @@ public class MediaTailorSessionManager(
             player,
             httpClient,
             adMapper,
-            sessionConfig
+            sessionConfig,
         )
         val sessionInitResult = session.initialize(sessionConfig)
 
         if (sessionInitResult is SessionInitializationResult.Success) {
             adPlaybackTracker = DefaultAdPlaybackTracker(
                 player,
-                session
+                session,
+            )
+            newAdPlaybackTracker = NewAdPlaybackTracker(
+                player,
+                session,
             )
             adPlaybackProcessor = DefaultAdPlaybackEventEmitter(
                 adPlaybackTracker!!,
-                flowEventEmitter
+                flowEventEmitter,
             )
             adBeaconing = DefaultAdBeaconing(
                 player,
                 adPlaybackTracker!!,
                 httpClient,
-                flowEventEmitter
+                flowEventEmitter,
             )
             this@MediaTailorSessionManager.session = session
         }
@@ -91,6 +97,8 @@ public class MediaTailorSessionManager(
     public fun destroy() {
         adPlaybackTracker?.dispose()
         adPlaybackTracker = null
+        newAdPlaybackTracker?.dispose()
+        newAdPlaybackTracker = null
         adBeaconing?.dispose()
         adBeaconing = null
         session?.dispose()

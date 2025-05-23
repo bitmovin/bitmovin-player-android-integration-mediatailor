@@ -1,5 +1,6 @@
 package com.bitmovin.player.integration.mediatailor
 
+import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
@@ -24,6 +25,87 @@ internal interface AdPlaybackTracker : Disposable {
     val nextAdBreak: StateFlow<MediaTailorAdBreak?>
     val currentAdBreak: StateFlow<MediaTailorAdBreak?>
     val currentAd: StateFlow<CurrentAd?>
+}
+
+internal class NewAdPlaybackTracker(
+    private val player: Player,
+    private val mediaTailorSession: MediaTailorSession,
+) : AdPlaybackTracker {
+    private val _nextAdBreak = MutableStateFlow<MediaTailorAdBreak?>(null)
+    private val _currentAdBreak = MutableStateFlow<MediaTailorAdBreak?>(null)
+    private val _currentAd = MutableStateFlow<CurrentAd?>(null)
+
+    override val nextAdBreak: StateFlow<MediaTailorAdBreak?> get() = _nextAdBreak
+    override val currentAdBreak: StateFlow<MediaTailorAdBreak?> get() = _currentAdBreak
+    override val currentAd: StateFlow<CurrentAd?> get() = _currentAd
+
+    private var currentAdBreakIndex: Int = 0
+    private var currentAdIndex: Int = 0
+
+    private val scope = CoroutineScope(Dispatchers.Main)
+
+    init {
+        scope.launch {
+            player.eventFlow<PlayerEvent.TimeChanged>().collect {
+                trackAdBreaks()
+            }
+        }
+        scope.launch {
+            merge(
+                player.eventFlow<PlayerEvent.Seeked>(),
+                player.eventFlow<PlayerEvent.TimeShifted>(),
+            ).collect {
+                resetState()
+            }
+        }
+    }
+
+    private fun resetState() {
+        currentAdBreakIndex = 0
+        currentAdIndex = 0
+    }
+
+    private fun trackAdBreaks() {
+        // Assume that adBreaks are sorted by schedule time
+        val adBreaks = mediaTailorSession.adBreaks.value.takeIf { it.isNotEmpty() } ?: return
+
+        while (currentAdBreakIndex < adBreaks.lastIndex &&
+            player.currentTime !in adBreaks[currentAdBreakIndex].startToEndTime
+        ) {
+            currentAdBreakIndex++
+        }
+
+        val adBreak = adBreaks[currentAdBreakIndex]
+
+        if (player.currentTime < adBreak.scheduleTime) {
+            Log.i("NewTracker", "Next ad break: $currentAdBreakIndex")
+        }
+
+        if (player.currentTime !in adBreak.startToEndTime) {
+            // Reset the ad index as the index at which we are is not the current ad break
+            currentAdIndex = 0
+            // Don't reset the ad break index so that the next time we only iterate through the new ads
+            return
+        }
+        Log.i("NewTracker", "Current ad break: $currentAdBreakIndex")
+
+        val ads = adBreak.ads
+        while (currentAdIndex < ads.lastIndex &&
+            player.currentTime !in ads[currentAdIndex].startToEndTime
+        ) {
+            currentAdIndex++
+        }
+
+        val ad = ads[currentAdIndex]
+        if (player.currentTime in ad.startToEndTime) {
+            // We have an ad within an ad break
+            Log.i("NewTracker", "Current ad: ${currentAdIndex + 1} of ${ads.size}")
+        }
+    }
+
+    override fun dispose() {
+        scope.cancel()
+    }
 }
 
 internal class DefaultAdPlaybackTracker(
