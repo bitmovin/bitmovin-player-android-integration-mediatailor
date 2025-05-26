@@ -1,22 +1,19 @@
 package com.bitmovin.player.integration.mediatailor.api
 
 import com.bitmovin.player.api.Player
+import com.bitmovin.player.integration.mediatailor.AdBeaconing
 import com.bitmovin.player.integration.mediatailor.AdPlaybackEventEmitter
-import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackEventEmitter
+import com.bitmovin.player.integration.mediatailor.AdPlaybackTracker
 import com.bitmovin.player.integration.mediatailor.DefaultAdBeaconing
+import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackEventEmitter
 import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackTracker
 import com.bitmovin.player.integration.mediatailor.DefaultAdsMapper
 import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSession
-import com.bitmovin.player.integration.mediatailor.AdBeaconing
-import com.bitmovin.player.integration.mediatailor.AdPlaybackTracker
 import com.bitmovin.player.integration.mediatailor.MediaTailorSession
 import com.bitmovin.player.integration.mediatailor.eventEmitter.FlowEventEmitter
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -26,7 +23,6 @@ import kotlinx.coroutines.withContext
 public class MediaTailorSessionManager(
     private val player: Player,
 ) {
-    private val scope = CoroutineScope(Dispatchers.Main)
     private val httpClient = DefaultHttpClient()
     private val adMapper = DefaultAdsMapper()
     private val flowEventEmitter = FlowEventEmitter()
@@ -38,23 +34,12 @@ public class MediaTailorSessionManager(
     public val events: Flow<MediaTailorEvent>
         get() = flowEventEmitter.events
 
-    // TODO: Maybe remove this
-    public fun initializeSession(
-        sessionConfig: MediaTailorSessionConfig,
-        callback: (SessionInitializationResult) -> Unit
-    ) {
-        scope.launch {
-            val sessionResult = initializeSession(sessionConfig)
-            callback(sessionResult)
-        }
-    }
-
     public suspend fun initializeSession(
         sessionConfig: MediaTailorSessionConfig
     ): SessionInitializationResult = withContext(Dispatchers.Main) {
         if (session != null) {
             val message =
-                "Session already initialized. Destroy the session before initializing a new one."
+                "Session already initialized. Stop the previous session before initializing a new one."
             flowEventEmitter.emit(MediaTailorEvent.Error(message))
             return@withContext SessionInitializationResult.Failure(message)
         }
@@ -87,14 +72,12 @@ public class MediaTailorSessionManager(
         sessionInitResult
     }
 
-    // TODO: Either stopSession or session manager should not be used anymore
-    public fun destroy() {
+    public fun stopSession() {
         adPlaybackTracker?.dispose()
         adPlaybackTracker = null
         adBeaconing?.dispose()
         adBeaconing = null
         session?.dispose()
         session = null
-        scope.cancel()
     }
 }
