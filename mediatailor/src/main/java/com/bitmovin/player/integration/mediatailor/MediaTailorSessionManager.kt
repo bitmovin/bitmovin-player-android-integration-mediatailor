@@ -31,7 +31,6 @@ internal class DefaultMediaTailorSessionManager(
         if (session != null) {
             val message =
                 "Session already initialized. Stop the previous session before initializing a new one."
-            flowEventEmitter.emit(MediaTailorEvent.Error(message))
             return@withContext SessionInitializationResult.Failure(message)
         }
         val session = dependencyFactory.createMediaTailorSession(

@@ -1,7 +1,6 @@
 package com.bitmovin.player.integration.mediatailor
 
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAssetType
-import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionManager
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
@@ -129,19 +128,6 @@ class MediaTailorSessionManagerSpec : UnitSpec({
                 )
 
                 expectThat(result).isA<SessionInitializationResult.Failure>()
-            }
-
-            it("emits an error event") {
-                mediaTailorSessionManager.initializeSession(
-                    sessionConfig = MediaTailorSessionConfig(
-                        sessionInitUrl = "https://example.com/session-init",
-                        assetType = MediaTailorAssetType.Vod,
-                    )
-                )
-
-                verify {
-                    eventEmitter.emit(any<MediaTailorEvent.Error>())
-                }
             }
         }
     }
