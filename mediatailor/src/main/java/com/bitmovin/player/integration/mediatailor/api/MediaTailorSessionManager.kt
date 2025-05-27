@@ -1,82 +1,82 @@
 package com.bitmovin.player.integration.mediatailor.api
 
 import com.bitmovin.player.api.Player
-import com.bitmovin.player.integration.mediatailor.AdBeaconing
-import com.bitmovin.player.integration.mediatailor.AdPlaybackEventEmitter
-import com.bitmovin.player.integration.mediatailor.AdPlaybackTracker
-import com.bitmovin.player.integration.mediatailor.DefaultAdBeaconing
-import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackEventEmitter
-import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackTracker
-import com.bitmovin.player.integration.mediatailor.DefaultAdsMapper
-import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSession
+import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSessionManager
 import com.bitmovin.player.integration.mediatailor.MediaTailorSession
-import com.bitmovin.player.integration.mediatailor.eventEmitter.FlowEventEmitter
-import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 /**
- * TODO: Docs
- * Limitations: - Playlists,...
+ * Manages a MediaTailor session for a given [Player].
+ *
+ * It responsible for initializing and stopping the session,
+ * as well as providing access to the events emitted by the session.
+ *
+ * As this is bound to the [Player] lifecycle, it should also be stopped when the player is released,
+ * by calling [stopSession].
+ *
+ * ### Usage:
+ * ```kotlin
+ * val player = Player(context)
+ * val mediaTailorSessionManager = MediaTailorSessionManager(player)
+ *
+ * scope.launch {
+ *     val sessionResult = mediaTailorSessionManager.initializeSession(
+ *         MediaTailorSessionConfig(
+ *             sessionInitUrl = "https://example.com/mediatailor/session-init.m3u8",
+ *             assetType = MediaTailorAssetType.Linear(),
+ *         )
+ *     )
+ *     when (val sessionResult = sessionResult) {
+ *         is Success -> {
+ *             player.load(SourceConfig.fromUrl(sessionResult.manifestUrl))
+ *         }
+ *         is Failure -> {
+ *              // Handle session initialization failure
+ *         }
+ *     }
+ * }
+ *
+ * // Stop the session when no longer needed:
+ * mediaTailorSessionManager.stopSession()
+ * player.destroy()
+ * ```
+ *
+ * ### Limitations:
+ * - Playlists are currently not supported
  */
-public class MediaTailorSessionManager(
-    private val player: Player,
-) {
-    private val httpClient = DefaultHttpClient()
-    private val adMapper = DefaultAdsMapper()
-    private val flowEventEmitter = FlowEventEmitter()
-    private var session: MediaTailorSession? = null
-    private var adPlaybackTracker: AdPlaybackTracker? = null
-    private var adPlaybackProcessor: AdPlaybackEventEmitter? = null
-    private var adBeaconing: AdBeaconing? = null
-
+public interface MediaTailorSessionManager {
+    /**
+     * A flow that emits events related to the [MediaTailorSession].
+     * For all the event types, see [MediaTailorEvent].
+     *
+     * For example to listen for ad break started events:
+     * ```kotlin
+     * mediaTailorSessionManager.events.filterIsInstance<MediaTailorEvent.AdBreakStarted>().collect {}
+     * ```
+     */
     public val events: Flow<MediaTailorEvent>
-        get() = flowEventEmitter.events
 
+    /**
+     * Initializes a MediaTailor session with the given configuration.
+     * @param sessionConfig The configuration for the MediaTailor session.
+     * @return A result indicating success or failure of the session initialization.
+     */
     public suspend fun initializeSession(
         sessionConfig: MediaTailorSessionConfig
-    ): SessionInitializationResult = withContext(Dispatchers.Main) {
-        if (session != null) {
-            val message =
-                "Session already initialized. Stop the previous session before initializing a new one."
-            flowEventEmitter.emit(MediaTailorEvent.Error(message))
-            return@withContext SessionInitializationResult.Failure(message)
-        }
-        val session = DefaultMediaTailorSession(
-            player,
-            httpClient,
-            adMapper,
-        )
-        val sessionInitResult = session.initialize(sessionConfig)
+    ): SessionInitializationResult
 
-        if (sessionInitResult is SessionInitializationResult.Success) {
-            adPlaybackTracker = DefaultAdPlaybackTracker(
-                player,
-                session,
-            )
-            adPlaybackProcessor = DefaultAdPlaybackEventEmitter(
-                adPlaybackTracker!!,
-                flowEventEmitter,
-            )
-            adBeaconing = DefaultAdBeaconing(
-                player,
-                adPlaybackTracker!!,
-                httpClient,
-                flowEventEmitter,
-            )
-            this@MediaTailorSessionManager.session = session
-        }
-
-        sessionInitResult
-    }
-
-    public fun stopSession() {
-        adPlaybackTracker?.dispose()
-        adPlaybackTracker = null
-        adBeaconing?.dispose()
-        adBeaconing = null
-        session?.dispose()
-        session = null
-    }
+    /**
+     * Stops the current MediaTailor session, if any.
+     * This will clean up resources and stop any ongoing ad tracking or beaconing.
+     */
+    public fun stopSession()
 }
+
+/**
+ * Creates a [MediaTailorSessionManager] for the given [Player].
+ */
+public fun MediaTailorSessionManager(
+    player: Player,
+): MediaTailorSessionManager = DefaultMediaTailorSessionManager(
+    player = player,
+)
