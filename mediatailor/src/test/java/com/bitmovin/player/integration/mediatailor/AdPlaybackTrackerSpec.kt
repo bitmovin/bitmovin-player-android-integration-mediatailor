@@ -23,6 +23,8 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
 import util.TestMediaTailorSession
 import util.UnitSpec
+import util.mockkPlayerExtension
+import util.unmockkPlayerExtension
 
 class AdPlaybackTrackerSpec : UnitSpec({
     val testDispatcher = UnconfinedTestDispatcher()
@@ -63,12 +65,12 @@ class AdPlaybackTrackerSpec : UnitSpec({
 
     beforeSpec {
         Dispatchers.setMain(testDispatcher)
-        mockkStatic("com.bitmovin.player.integration.mediatailor.util.PlayerExtension")
+        mockkPlayerExtension()
     }
 
     afterSpec {
         Dispatchers.resetMain()
-        unmockkStatic("com.bitmovin.player.integration.mediatailor.util.PlayerExtension")
+        unmockkPlayerExtension()
     }
 
     beforeEach {

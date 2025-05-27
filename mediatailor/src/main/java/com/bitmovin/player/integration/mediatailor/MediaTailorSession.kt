@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import okio.IOException
 import java.net.URI
@@ -38,22 +39,21 @@ internal class DefaultMediaTailorSession(
     private val player: Player,
     private val httpClient: HttpClient,
     private val adsMapper: AdsMapper,
-    private val config: MediaTailorSessionConfig,
 ) : MediaTailorSession {
     private val mainScope = CoroutineScope(Dispatchers.Main)
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
-    private val _trackingUrl = MutableStateFlow<String?>(null)
+    private val json = Json { ignoreUnknownKeys = true }
     private val _adBreaks = MutableStateFlow<List<MediaTailorAdBreak>>(emptyList())
     override val adBreaks: StateFlow<List<MediaTailorAdBreak>>
         get() = _adBreaks
+
+    private var trackingUrl: String? = null
+    private var sessionConfig: MediaTailorSessionConfig? = null
     private var refreshTrackingResponseJob: Job? = null
 
     init {
         mainScope.launch {
             player.eventFlow<SourceEvent.Loaded>().collect {
-                when (val assetType = config.assetType) {
+                when (val assetType = sessionConfig?.assetType) {
                     MediaTailorAssetType.Vod -> mainScope.launch { fetchTrackingData() }
                     is MediaTailorAssetType.Linear -> {
                         refreshTrackingResponseJob?.cancel()
@@ -61,6 +61,8 @@ internal class DefaultMediaTailorSession(
                             assetType.config.trackingRequestPollFrequency
                         )
                     }
+
+                    else -> Unit
                 }
             }
         }
@@ -70,6 +72,28 @@ internal class DefaultMediaTailorSession(
                 refreshTrackingResponseJob = null
             }
         }
+    }
+
+    override suspend fun initialize(
+        sessionConfig: MediaTailorSessionConfig,
+    ): SessionInitializationResult = withContext(Dispatchers.Main) {
+        val response = runCatchingCooperative {
+            requestSessionInitialization(sessionConfig)
+        }
+
+        if (response.isFailure) {
+            return@withContext SessionInitializationResult.Failure(response.exceptionOrNull()!!.message)
+        }
+
+        val successResponse = response.getOrThrow()
+        val baseUri = URI(sessionConfig.sessionInitUrl)
+        val manifestUrl = baseUri.resolve(successResponse.manifestUrl).toString()
+        val trackingUrl = baseUri.resolve(successResponse.trackingUrl).toString()
+
+        this@DefaultMediaTailorSession.sessionConfig = sessionConfig
+        this@DefaultMediaTailorSession.trackingUrl = trackingUrl
+
+        return@withContext SessionInitializationResult.Success(manifestUrl = manifestUrl)
     }
 
     private fun continuouslyFetchTrackingDataJob(
@@ -85,36 +109,15 @@ internal class DefaultMediaTailorSession(
         }
     }
 
-    override suspend fun initialize(
-        sessionConfig: MediaTailorSessionConfig,
-    ): SessionInitializationResult {
-        val response = runCatchingCooperative {
-            requestSessionInitialization(sessionConfig)
-        }
-
-        if (response.isFailure) {
-            return SessionInitializationResult.Failure(response.exceptionOrNull()!!.message)
-        }
-
-        val successResponse = response.getOrThrow()
-        val baseUri = URI(sessionConfig.sessionInitUrl)
-        val manifestUrl = baseUri.resolve(successResponse.manifestUrl).toString()
-        val trackingUrl = baseUri.resolve(successResponse.trackingUrl).toString()
-
-        _trackingUrl.update { trackingUrl }
-
-        return SessionInitializationResult.Success(manifestUrl = manifestUrl)
-    }
-
     private suspend fun fetchTrackingData(): Boolean = runCatchingCooperative {
         requestTrackingData()
     }.isSuccess
 
     override val isInitialized: Boolean
-        get() = _trackingUrl.value != null
+        get() = trackingUrl != null
 
     private suspend fun requestTrackingData() {
-        val trackingUrl = _trackingUrl.value ?: return
+        val trackingUrl = trackingUrl ?: return
         val response = requestTrackingData(trackingUrl)
         _adBreaks.update { adsMapper.mapAdBreaks(response.avails) }
     }
@@ -153,7 +156,8 @@ internal class DefaultMediaTailorSession(
     }
 
     override fun dispose() {
-        _trackingUrl.update { null }
+        trackingUrl = null
+        sessionConfig = null
         mainScope.cancel()
     }
 }

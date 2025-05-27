@@ -47,7 +47,6 @@ public class MediaTailorSessionManager(
             player,
             httpClient,
             adMapper,
-            sessionConfig,
         )
         val sessionInitResult = session.initialize(sessionConfig)
 

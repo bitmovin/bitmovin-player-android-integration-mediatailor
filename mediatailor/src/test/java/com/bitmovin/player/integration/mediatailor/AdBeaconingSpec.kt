@@ -26,6 +26,8 @@ import strikt.assertions.single
 import util.TestAdPlaybackTracker
 import util.TestHttpClient
 import util.UnitSpec
+import util.mockkPlayerExtension
+import util.unmockkPlayerExtension
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AdBeaconingSpec : UnitSpec({
@@ -36,12 +38,12 @@ class AdBeaconingSpec : UnitSpec({
 
     beforeSpec {
         Dispatchers.setMain(testDispatcher)
-        mockkStatic("com.bitmovin.player.integration.mediatailor.util.PlayerExtension")
+        mockkPlayerExtension()
     }
 
     afterSpec {
         Dispatchers.resetMain()
-        unmockkStatic("com.bitmovin.player.integration.mediatailor.util.PlayerExtension")
+        unmockkPlayerExtension()
     }
 
     fun setUp(
