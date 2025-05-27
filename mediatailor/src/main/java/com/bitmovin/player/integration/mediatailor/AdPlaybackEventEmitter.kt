@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 internal interface AdPlaybackEventEmitter : Disposable
 
 internal class DefaultAdPlaybackEventEmitter(
-    private val betterAdPlaybackTracker: AdPlaybackTracker,
+    private val adPlaybackTracker: AdPlaybackTracker,
     private val eventEmitter: InternalEventEmitter,
 ) : AdPlaybackEventEmitter {
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -19,12 +19,12 @@ internal class DefaultAdPlaybackEventEmitter(
 
     init {
         scope.launch {
-            betterAdPlaybackTracker.nextAdBreak.collect {
+            adPlaybackTracker.nextAdBreak.collect {
                 eventEmitter.emit(MediaTailorEvent.UpcomingAdBreakUpdate(it))
             }
         }
         scope.launch {
-            betterAdPlaybackTracker.playingAdBreak.collect { playingAdBreak ->
+            adPlaybackTracker.playingAdBreak.collect { playingAdBreak ->
                 when {
                     previousPlayingAdBreak == null && playingAdBreak != null -> {
                         eventEmitter.emit(MediaTailorEvent.AdBreakStarted(playingAdBreak.adBreak))

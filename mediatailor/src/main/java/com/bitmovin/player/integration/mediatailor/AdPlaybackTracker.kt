@@ -46,6 +46,7 @@ internal class DefaultAdPlaybackTracker(
     private val scope = CoroutineScope(Dispatchers.Main)
 
     init {
+        trackAdBreaks()
         scope.launch {
             player.eventFlow<PlayerEvent.TimeChanged>().collect {
                 trackAdBreaks()
@@ -74,17 +75,23 @@ internal class DefaultAdPlaybackTracker(
         val adBreaks = mediaTailorSession.adBreaks.value.takeIf { it.isNotEmpty() } ?: return
 
         while (currentAdBreakIndex < adBreaks.lastIndex &&
-            player.currentTime !in adBreaks[currentAdBreakIndex].startToEndTime
+            player.currentTime >= adBreaks[currentAdBreakIndex].endTime
         ) {
             currentAdBreakIndex++
         }
 
         val adBreak = adBreaks[currentAdBreakIndex]
 
-        if (player.currentTime < adBreak.scheduleTime) {
-            _nextAdBreak.update { adBreak }
-        } else {
-            _nextAdBreak.update { null }
+        when {
+            player.currentTime < adBreak.scheduleTime -> {
+                _nextAdBreak.update { adBreak }
+            }
+            adBreaks.getOrNull(currentAdBreakIndex + 1) != null -> {
+                _nextAdBreak.update { adBreaks[currentAdBreakIndex + 1] }
+            }
+            else -> {
+                _nextAdBreak.update { null }
+            }
         }
 
         if (player.currentTime !in adBreak.startToEndTime) {
@@ -95,7 +102,7 @@ internal class DefaultAdPlaybackTracker(
 
         val ads = adBreak.ads
         while (currentAdIndex < ads.lastIndex &&
-            player.currentTime !in ads[currentAdIndex].startToEndTime
+            player.currentTime >= ads[currentAdIndex].endTime
         ) {
             currentAdIndex++
         }
