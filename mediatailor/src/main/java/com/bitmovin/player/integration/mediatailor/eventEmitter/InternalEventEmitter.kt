@@ -8,13 +8,14 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 internal interface InternalEventEmitter {
+    val events: SharedFlow<MediaTailorEvent>
     fun emit(event: MediaTailorEvent)
 }
 
 internal class FlowEventEmitter : InternalEventEmitter {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val _events = MutableSharedFlow<MediaTailorEvent>()
-    val events: SharedFlow<MediaTailorEvent>
+    override val events: SharedFlow<MediaTailorEvent>
         get() = _events
 
     override fun emit(event: MediaTailorEvent) {

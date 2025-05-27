@@ -5,21 +5,21 @@ import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionManager
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
-import com.bitmovin.player.integration.mediatailor.eventEmitter.FlowEventEmitter
-import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
+import com.bitmovin.player.integration.mediatailor.util.DependencyFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 internal class DefaultMediaTailorSessionManager(
     private val player: Player,
+    private val dependencyFactory: DependencyFactory = DependencyFactory(),
 ) : MediaTailorSessionManager {
-    private val httpClient = DefaultHttpClient()
-    private val adMapper = DefaultAdsMapper()
-    private val flowEventEmitter = FlowEventEmitter()
+    private val httpClient = dependencyFactory.createHttpClient()
+    private val adMapper = dependencyFactory.createAdsMapper()
+    private val flowEventEmitter = dependencyFactory.createEventEmitter()
     private var session: MediaTailorSession? = null
     private var adPlaybackTracker: AdPlaybackTracker? = null
-    private var adPlaybackProcessor: AdPlaybackEventEmitter? = null
+    private var adPlaybackEventEmitter: AdPlaybackEventEmitter? = null
     private var adBeaconing: AdBeaconing? = null
 
     override val events: Flow<MediaTailorEvent>
@@ -34,7 +34,7 @@ internal class DefaultMediaTailorSessionManager(
             flowEventEmitter.emit(MediaTailorEvent.Error(message))
             return@withContext SessionInitializationResult.Failure(message)
         }
-        val session = DefaultMediaTailorSession(
+        val session = dependencyFactory.createMediaTailorSession(
             player,
             httpClient,
             adMapper,
@@ -42,15 +42,15 @@ internal class DefaultMediaTailorSessionManager(
         val sessionInitResult = session.initialize(sessionConfig)
 
         if (sessionInitResult is SessionInitializationResult.Success) {
-            adPlaybackTracker = DefaultAdPlaybackTracker(
+            adPlaybackTracker = dependencyFactory.createAdPlaybackTracker(
                 player,
                 session,
             )
-            adPlaybackProcessor = DefaultAdPlaybackEventEmitter(
+            adPlaybackEventEmitter = dependencyFactory.createAdPlaybackEventEmitter(
                 adPlaybackTracker!!,
                 flowEventEmitter,
             )
-            adBeaconing = DefaultAdBeaconing(
+            adBeaconing = dependencyFactory.createAdBeaconing(
                 player,
                 adPlaybackTracker!!,
                 httpClient,
@@ -65,6 +65,8 @@ internal class DefaultMediaTailorSessionManager(
     override fun stopSession() {
         adPlaybackTracker?.dispose()
         adPlaybackTracker = null
+        adPlaybackEventEmitter?.dispose()
+        adPlaybackEventEmitter = null
         adBeaconing?.dispose()
         adBeaconing = null
         session?.dispose()
