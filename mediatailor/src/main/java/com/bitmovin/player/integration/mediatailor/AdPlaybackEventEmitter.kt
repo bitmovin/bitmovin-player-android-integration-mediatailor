@@ -60,7 +60,6 @@ internal class DefaultAdPlaybackEventEmitter(
     }
 
     override fun dispose() {
-        previousPlayingAdBreak = null
         scope.cancel()
     }
 }

@@ -6,8 +6,6 @@ import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
-import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
-import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import io.mockk.every
 import io.mockk.mockk
@@ -17,12 +15,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
+import util.FakeMediaTailorSession
 import util.UnitSpec
 
 class AdPlaybackTrackerSpec : UnitSpec({
@@ -63,16 +62,16 @@ class AdPlaybackTrackerSpec : UnitSpec({
     }
 
     beforeSpec {
+        Dispatchers.setMain(testDispatcher)
         mockkStatic("com.bitmovin.player.integration.mediatailor.util.PlayerExtension")
     }
 
     afterSpec {
+        Dispatchers.resetMain()
         unmockkStatic("com.bitmovin.player.integration.mediatailor.util.PlayerExtension")
     }
 
     beforeEach {
-        Dispatchers.setMain(testDispatcher)
-
         createPlayer()
         createAdPlaybackTracker()
     }
@@ -404,16 +403,3 @@ class AdPlaybackTrackerSpec : UnitSpec({
         }
     }
 })
-
-class FakeMediaTailorSession(
-    override val isInitialized: Boolean = true,
-    override val adBreaks: StateFlow<List<MediaTailorAdBreak>>
-) : MediaTailorSession {
-    override suspend fun initialize(sessionConfig: MediaTailorSessionConfig): SessionInitializationResult {
-        TODO("Not yet implemented")
-    }
-
-    override fun dispose() {
-        TODO("Not yet implemented")
-    }
-}
