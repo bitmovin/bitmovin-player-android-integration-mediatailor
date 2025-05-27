@@ -2,6 +2,7 @@ package com.bitmovin.player.integration.mediatailor.mediatailorsample
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.bitmovin.player.api.Player
@@ -51,13 +52,7 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
     private val currentAdBreak = mediaTailorSessionManager
         .events
         .filter { it is MediaTailorEvent.AdBreakStarted || it is MediaTailorEvent.AdBreakFinished }
-        .map {
-            if (it is MediaTailorEvent.AdBreakStarted) {
-                it.adBreak
-            } else {
-                null
-            }
-        }
+        .map { if (it is MediaTailorEvent.AdBreakStarted) it.adBreak else null }
         .stateIn(
             viewModelScope,
             started = SharingStarted.Eagerly,
@@ -90,6 +85,16 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 is Failure -> _uiState.update {
                     UiState(errorMessage = "Error: ${sessionResult.message}")
                 }
+            }
+        }
+        viewModelScope.launch {
+            mediaTailorSessionManager.events.filterIsInstance<MediaTailorEvent.Info>().collect {
+                Log.d("PlaybackViewModel", it.message)
+            }
+        }
+        viewModelScope.launch {
+            mediaTailorSessionManager.events.filterIsInstance<MediaTailorEvent.Error>().collect {
+                Log.e("PlaybackViewModel", it.message)
             }
         }
     }

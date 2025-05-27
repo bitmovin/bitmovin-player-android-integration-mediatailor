@@ -9,8 +9,6 @@ import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow

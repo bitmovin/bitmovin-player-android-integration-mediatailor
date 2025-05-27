@@ -3,6 +3,9 @@ package com.bitmovin.player.integration.mediatailor.api
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Configuration for MediaTailor session initialization.
+ */
 public data class MediaTailorSessionConfig(
     /**
      * Url to the MediaTailor explicit session initialization endpoint.

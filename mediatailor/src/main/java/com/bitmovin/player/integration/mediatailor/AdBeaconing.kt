@@ -32,7 +32,6 @@ internal class DefaultAdBeaconing(
             player.eventFlow<PlayerEvent.TimeChanged>().collect { timeChangedEvent ->
                 val ad = adPlaybackTracker.playingAdBreak.value?.ad ?: return@collect
 
-                // TODO: Check if it's ok track E.g. third quartile if we skipped start and midpoint
                 ad.trackingEvents
                     .filter { timeChangedEvent.time in it.paddedStartTime }
                     .filter { it.isLinearAdMetric }
@@ -42,8 +41,10 @@ internal class DefaultAdBeaconing(
                         }
                         firedTrackingEvents.add(trackingEvent.id)
 
-                        eventEmitter.emit(MediaTailorEvent.Info("Tracking event: ${trackingEvent.eventType}"))
-                        trackingEvent.beaconUrls.forEach { launch { httpClient.get(it) } }
+                        trackingEvent.beaconUrls.forEach {
+                            eventEmitter.emit(MediaTailorEvent.Info("Tracking event ${trackingEvent.eventType}: $it"))
+                            launch { httpClient.get(it) }
+                        }
                     }
             }
         }
@@ -69,11 +70,9 @@ internal class DefaultAdBeaconing(
 
         ad.trackingEvents
             .find { it.eventType == eventType }
-            ?.also {
-                eventEmitter.emit(MediaTailorEvent.Info("Tracking event: $eventType"))
-            }
             ?.beaconUrls
             ?.forEach {
+                eventEmitter.emit(MediaTailorEvent.Info("Tracking event $eventType: $it"))
                 scope.launch { httpClient.get(it) }
             }
     }

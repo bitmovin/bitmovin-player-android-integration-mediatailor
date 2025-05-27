@@ -58,8 +58,11 @@ public interface MediaTailorSessionManager {
 
     /**
      * Initializes a MediaTailor session with the given configuration.
-     * @param sessionConfig The configuration for the MediaTailor session.
-     * @return A result indicating success or failure of the session initialization.
+     * [sessionConfig] provides configuration for the MediaTailor session.
+     *
+     * Returns [SessionInitializationResult] indicating either:
+     * - [SessionInitializationResult.Success] for successful initialization
+     * - [SessionInitializationResult.Failure] for any errors during initialization
      */
     public suspend fun initializeSession(
         sessionConfig: MediaTailorSessionConfig
