@@ -6,7 +6,7 @@ import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
 import kotlinx.coroutines.flow.StateFlow
 
-class FakeMediaTailorSession(
+class TestMediaTailorSession(
     override val isInitialized: Boolean = true,
     override val adBreaks: StateFlow<List<MediaTailorAdBreak>>,
 ) : MediaTailorSession {

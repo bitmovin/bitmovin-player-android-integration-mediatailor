@@ -21,7 +21,7 @@ import kotlinx.coroutines.test.setMain
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
-import util.FakeMediaTailorSession
+import util.TestMediaTailorSession
 import util.UnitSpec
 
 class AdPlaybackTrackerSpec : UnitSpec({
@@ -51,7 +51,7 @@ class AdPlaybackTrackerSpec : UnitSpec({
     fun createAdPlaybackTracker(
         adBreaks: List<MediaTailorAdBreak> = emptyList()
     ) {
-        val fakeMediaTailorSession = FakeMediaTailorSession(
+        val fakeMediaTailorSession = TestMediaTailorSession(
             adBreaks = MutableStateFlow(adBreaks),
         )
 

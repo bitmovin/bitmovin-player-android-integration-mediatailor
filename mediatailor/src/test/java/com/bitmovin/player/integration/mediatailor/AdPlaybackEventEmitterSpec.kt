@@ -17,7 +17,7 @@ import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEmpty
 import strikt.assertions.single
-import util.FakeAdPlaybackTracker
+import util.TestAdPlaybackTracker
 import util.TestEventEmitter
 import util.UnitSpec
 
@@ -40,10 +40,10 @@ class AdPlaybackEventEmitterSpec : UnitSpec({
     beforeEach {
         nextAdBreak = MutableStateFlow<MediaTailorAdBreak?>(null)
         playingAdBreak = MutableStateFlow<PlayingAdBreak?>(null)
-        val fakeAdPlaybackTracker = FakeAdPlaybackTracker(nextAdBreak, playingAdBreak)
+        val testAdPlaybackTracker = TestAdPlaybackTracker(nextAdBreak, playingAdBreak)
 
         adPlaybackEventEmitter = DefaultAdPlaybackEventEmitter(
-            adPlaybackTracker = fakeAdPlaybackTracker,
+            adPlaybackTracker = testAdPlaybackTracker,
             eventEmitter = testEventEmitter,
         )
         testEventEmitter.emittedEvents.clear()
