@@ -29,12 +29,12 @@ internal class DefaultAdBeaconing(
 
     init {
         scope.launch {
-            player.eventFlow<PlayerEvent.TimeChanged>().collect {
+            player.eventFlow<PlayerEvent.TimeChanged>().collect { timeChangedEvent ->
                 val ad = adPlaybackTracker.playingAdBreak.value?.ad ?: return@collect
 
                 // TODO: Check if it's ok track E.g. third quartile if we skipped start and midpoint
                 ad.trackingEvents
-                    .filter { player.currentTime in it.paddedStartTime }
+                    .filter { timeChangedEvent.time in it.paddedStartTime }
                     .filter { it.isLinearAdMetric }
                     .forEach { trackingEvent ->
                         if (trackingEvent.id in firedTrackingEvents) {
