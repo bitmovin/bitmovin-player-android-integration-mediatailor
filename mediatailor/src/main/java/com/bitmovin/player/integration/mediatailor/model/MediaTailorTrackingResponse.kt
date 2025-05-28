@@ -3,12 +3,12 @@ package com.bitmovin.player.integration.mediatailor.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MediaTailorTrackingResponse(
+internal data class MediaTailorTrackingResponse(
     val avails: List<Avail>
 )
 
 @Serializable
-data class Avail(
+internal data class Avail(
     val ads: List<Ad>,
     val availId: String,
     val duration: String,
@@ -18,7 +18,7 @@ data class Avail(
 )
 
 @Serializable
-data class Ad(
+internal data class Ad(
     val adId: String,
     val duration: String,
     val durationInSeconds: Double,
@@ -28,7 +28,7 @@ data class Ad(
 )
 
 @Serializable
-data class TrackingEvent(
+internal data class TrackingEvent(
     val beaconUrls: List<String>,
     val duration: String,
     val durationInSeconds: Double,
@@ -36,10 +36,4 @@ data class TrackingEvent(
     val eventType: String,
     val startTime: String,
     val startTimeInSeconds: Double
-)
-
-@Serializable
-data class MediaTailorSessionInitializationResponse(
-    val manifestUrl: String,
-    val trackingUrl: String
 )

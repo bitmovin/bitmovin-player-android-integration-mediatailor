@@ -49,6 +49,11 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
     publishing {
         singleVariant("release") {
             withSourcesJar()
@@ -68,16 +73,33 @@ tasks.withType<KotlinJvmCompile>().all {
 
 dependencies {
     compileOnly(libs.bitmovin.player)
-    compileOnly(libs.bitmovin.player.base)
     implementation(libs.kotlinx.serialization.json)
-
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    testImplementation(libs.junit)
+
+    testImplementation(libs.bitmovin.player)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotest)
+    testImplementation(libs.mockk.core)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.strikt.core)
+    testImplementation(libs.strikt.mockk)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
+tasks.withType<KotlinJvmCompile>().all {
+    if (this.name.contains("Test")) return@all
+
+    compilerOptions.allWarningsAsErrors.set(true)
+    compilerOptions {
+        // Enable explicit API for production code
+        freeCompilerArgs.add("-Xexplicit-api=strict")
+    }
+}
+
 
 project.afterEvaluate {
     publishing {
