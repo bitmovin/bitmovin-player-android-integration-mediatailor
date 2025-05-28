@@ -42,7 +42,7 @@ internal class DefaultAdBeaconing(
                         firedTrackingEvents.add(trackingEvent.id)
 
                         trackingEvent.beaconUrls.forEach {
-                            eventEmitter.emit(MediaTailorEvent.Info("Tracking event ${trackingEvent.eventType}: $it"))
+                            eventEmitter.emit(MediaTailorEvent.Info("Tracking event '${trackingEvent.eventType}': $it"))
                             launch { httpClient.get(it) }
                         }
                     }
@@ -72,7 +72,7 @@ internal class DefaultAdBeaconing(
             .find { it.eventType == eventType }
             ?.beaconUrls
             ?.forEach {
-                eventEmitter.emit(MediaTailorEvent.Info("Tracking event $eventType: $it"))
+                eventEmitter.emit(MediaTailorEvent.Info("Tracking event '$eventType': $it"))
                 scope.launch { httpClient.get(it) }
             }
     }
