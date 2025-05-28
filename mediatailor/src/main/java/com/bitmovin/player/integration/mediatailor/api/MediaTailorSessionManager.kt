@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Manages a MediaTailor session for a given [Player].
  *
- * It responsible for initializing and stopping the session,
+ * It is responsible for initializing and stopping the session,
  * as well as providing access to the events emitted by the session.
  *
  * As this is bound to the [Player] lifecycle, it should also be stopped when the player is released,
- * by calling [stopSession].
+ * or when loading a new source, using [stopSession].
  *
- * ### Usage:
+ * ### Example Usage:
  * ```kotlin
  * val player = Player(context)
  * val mediaTailorSessionManager = MediaTailorSessionManager(player)
@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.Flow
  */
 public interface MediaTailorSessionManager {
     /**
-     * A flow that emits events related to the [MediaTailorSession].
+     * A flow that emits events related to the [MediaTailorSessionManager] and all it's sessions.
      * For all the event types, see [MediaTailorEvent].
      *
      * For example to listen for ad break started events:
@@ -71,6 +71,9 @@ public interface MediaTailorSessionManager {
     /**
      * Stops the current MediaTailor session, if any.
      * This will clean up resources and stop any ongoing ad tracking or beaconing.
+     *
+     * It is important to call this method when the player is no longer in use,
+     * or when loading a new source.
      */
     public fun stopSession()
 }

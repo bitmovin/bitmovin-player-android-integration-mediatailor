@@ -1,5 +1,8 @@
 package com.bitmovin.player.integration.mediatailor.api
 
+/**
+ * Includes all events that can be emitted by the [MediaTailorSessionManager].
+ */
 public sealed class MediaTailorEvent(
     /**
      * The time at which the event was emitted in milliseconds since the Unix Epoch.
@@ -7,12 +10,12 @@ public sealed class MediaTailorEvent(
     public val timestamp: Long = System.currentTimeMillis()
 ) {
     /**
-     * An ad has started playing.
-     *
-     * Use [ad] to access the details of the ad.
-     * Use [indexInQueue] to access the index of the ad within the ad break.
+     * Emitted when the playback of an ad has started.
      */
     public class AdStarted(
+        /**
+         * The ad that has started playback.
+         */
         public val ad: MediaTailorLinearAd,
         /**
          * The index of the ad in the queue.
@@ -21,55 +24,62 @@ public sealed class MediaTailorEvent(
     ) : MediaTailorEvent()
 
     /**
-     * Emitted when an ad has finished playing.
-     *
-     * Use [ad] to access the details of the ad.
+     * Emitted when an ad has finished playback.
      */
     public class AdFinished(
+        /**
+         * The ad that has finished playback.
+         */
         public val ad: MediaTailorLinearAd,
     ) : MediaTailorEvent()
 
     /**
      * Emitted when an ad break has started.
-     *
-     * Use [adBreak] to access the details of the ad break.
      */
     public class AdBreakStarted(
+        /**
+         * The ad break that has started.
+         */
         public val adBreak: MediaTailorAdBreak,
     ) : MediaTailorEvent()
 
     /**
      * Emitted when an ad break has finished.
-     *
-     * Use [adBreak] to access the details of the ad break.
      */
     public class AdBreakFinished(
+        /**
+         * The ad break that has finished.
+         */
         public val adBreak: MediaTailorAdBreak,
     ) : MediaTailorEvent()
 
     /**
      * Emitted when an upcoming ad break is detected.
-     *
-     * Use [adBreak] to access the details of the ad break.
      */
     public class UpcomingAdBreakUpdate(
+        /**
+         * The ad break that is upcoming or `null` if currently no upcoming ad break is known.
+         */
         public val adBreak: MediaTailorAdBreak?,
     ) : MediaTailorEvent()
 
     /**
-     * Emitted for neutral information provided by the media tailor session.
-     *
-     * Check [message] for details.
+     * Emitted for neutral information provided by [MediaTailorSessionManager].
      */
     public class Info(
+        /**
+         * A message describing the information.
+         */
         public val message: String,
     ) : MediaTailorEvent()
 
     /**
-     * An error has occurred during the MediaTailor session.
-     * Check [message] for details.
+     * Emitted for error information provided by [MediaTailorSessionManager].
      */
     public class Error(
+        /**
+         * A message describing the error.
+         */
         public val message: String,
     ) : MediaTailorEvent()
 }

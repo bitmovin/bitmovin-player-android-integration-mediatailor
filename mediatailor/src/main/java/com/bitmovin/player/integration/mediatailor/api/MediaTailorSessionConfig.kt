@@ -4,7 +4,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Configuration for MediaTailor session initialization.
+ * Configuration for session initialization with [MediaTailorSessionManager].
  */
 public data class MediaTailorSessionConfig(
     /**
@@ -27,11 +27,15 @@ public data class MediaTailorSessionConfig(
 
 public sealed class MediaTailorAssetType {
     /**
+     * Vod asset type.
+     *
      * https://docs.aws.amazon.com/mediatailor/latest/ug/channel-assembly-working-vod-sources.html
      */
     public object Vod : MediaTailorAssetType()
 
     /**
+     * Linear asset type.
+     *
      * https://docs.aws.amazon.com/mediatailor/latest/ug/channel-assembly-working-live-sources.html
      */
     public class Linear(
