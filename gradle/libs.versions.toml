@@ -17,6 +17,7 @@ kotlinxSerialization = "1.6.3"
 kotest = "5.9.1"
 mockk = "1.13.17"
 strikt = "0.34.1"
+pluginArtifactory = "5.2.5"
 
 [libraries]
 bitmovin-player = { module = "com.bitmovin.player:player", version.ref = "player" }
@@ -52,4 +53,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+jfrog-artifactory = { id = "com.jfrog.artifactory", version.ref = "pluginArtifactory" }
 
