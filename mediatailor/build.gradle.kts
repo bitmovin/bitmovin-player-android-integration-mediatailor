@@ -61,16 +61,6 @@ android {
     }
 }
 
-/** Auto opt-in for InternalBitmovinApi */
-tasks.withType<KotlinJvmCompile>().all {
-    compilerOptions {
-        freeCompilerArgs.add("-opt-in=com.bitmovin.player.core.internal.InternalBitmovinApi")
-        freeCompilerArgs.add("-opt-in=com.bitmovin.player.core.internal.InternalPlayerApi")
-        freeCompilerArgs.add("-opt-in=com.bitmovin.player.base.internal.InternalBitmovinApi")
-        freeCompilerArgs.add("-opt-in=com.bitmovin.analytics.internal.InternalBitmovinApi")
-    }
-}
-
 dependencies {
     compileOnly(libs.bitmovin.player)
     implementation(libs.kotlinx.serialization.json)

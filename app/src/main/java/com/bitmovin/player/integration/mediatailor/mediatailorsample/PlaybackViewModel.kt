@@ -76,14 +76,14 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                     assetType = MediaTailorAssetType.Linear(),
                 )
             )
-            when (val sessionResult = sessionResult) {
+            when (val result = sessionResult) {
                 is Success -> {
-                    player.load(SourceConfig.fromUrl(sessionResult.manifestUrl))
+                    player.load(SourceConfig.fromUrl(result.manifestUrl))
                     startTrackingSession()
                 }
 
                 is Failure -> _uiState.update {
-                    UiState(errorMessage = "Error: ${sessionResult.message}")
+                    UiState(errorMessage = "Error: ${result.message}")
                 }
             }
         }
