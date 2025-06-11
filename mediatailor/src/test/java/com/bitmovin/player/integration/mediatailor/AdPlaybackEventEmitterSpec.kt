@@ -2,7 +2,7 @@ package com.bitmovin.player.integration.mediatailor
 
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
-import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent.UpcomingAdBreakUpdate
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent.UpcomingAdBreakUpdated
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,7 +62,7 @@ class AdPlaybackEventEmitterSpec : UnitSpec({
             expectThat(testEventEmitter.emittedEvents)
                 .isNotEmpty()
                 .single()
-                .isA<UpcomingAdBreakUpdate>()
+                .isA<UpcomingAdBreakUpdated>()
                 .and {
                     get { adBreak }.isEqualTo(adBreak)
                 }
