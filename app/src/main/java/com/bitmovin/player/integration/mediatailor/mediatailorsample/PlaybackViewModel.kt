@@ -31,6 +31,7 @@ data class UiState(
     val currentAdBreakMessage: String? = null,
     val currentAdMessage: String? = null,
     val errorMessage: String? = null,
+    val adBreaksMessage: String? = null,
 )
 
 class PlaybackViewModel(application: Application) : AndroidViewModel(application) {
@@ -44,29 +45,22 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
         .events
         .filterIsInstance<MediaTailorEvent.UpcomingAdBreakUpdate>()
         .map { it.adBreak }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     private val currentAdBreak = mediaTailorSessionManager
         .events
         .filter { it is MediaTailorEvent.AdBreakStarted || it is MediaTailorEvent.AdBreakFinished }
         .map { if (it is MediaTailorEvent.AdBreakStarted) it.adBreak else null }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     private val currentAd = mediaTailorSessionManager
         .events
         .filter { it is MediaTailorEvent.AdStarted || it is MediaTailorEvent.AdFinished }
         .map { it as? MediaTailorEvent.AdStarted }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    private val allAdBreaks = mediaTailorSessionManager
+        .events
+        .filterIsInstance<MediaTailorEvent.AdBreakScheduleUpdated>()
+        .map { it.adBreaks }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     init {
         viewModelScope.launch {
@@ -108,6 +102,7 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 nextAdBreak,
                 currentAdBreak,
                 currentAd,
+                allAdBreaks,
             ).collect {
                 updateUiState()
             }
@@ -140,12 +135,23 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 currentAdTimeLeftSeconds,
             )
         }
+        val adBreakMarkersMessage = buildString {
+            append("Ad Breaks:\n")
+            append(allAdBreaks.value.joinToString("\n") {
+                String.format(
+                    adBreaksMessageFormat,
+                    it.scheduleTime,
+                    it.scheduleTime + it.duration
+                )
+            })
+        }
 
         _uiState.update {
             UiState(
                 nextAdBreakMessage = upcomingAdBreakMessage,
                 currentAdBreakMessage = currentAdBreakMessage,
                 currentAdMessage = currentAdMessage,
+                adBreaksMessage = adBreakMarkersMessage,
             )
         }
     }
@@ -159,3 +165,4 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
 private const val nextAdBreakMessageFormat = "Next ad break in %d s"
 private const val currentAdBreakMessageFormat = "Current ad break ends in %d s"
 private const val currentAdMessageFormat = "Playing ad %d / %d.\nEnds in %d s"
+private const val adBreaksMessageFormat = "Ad Break: from: %d to: %d"

@@ -34,5 +34,8 @@ fun PlaybackScreen(
         if (uiState.currentAdMessage != null) {
             Text(text = uiState.currentAdMessage)
         }
+        if (uiState.adBreaksMessage != null) {
+            Text(text = uiState.adBreaksMessage)
+        }
     }
 }

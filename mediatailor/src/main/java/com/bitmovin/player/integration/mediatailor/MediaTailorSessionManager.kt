@@ -20,6 +20,7 @@ internal class DefaultMediaTailorSessionManager(
     private var session: MediaTailorSession? = null
     private var adPlaybackTracker: AdPlaybackTracker? = null
     private var adPlaybackEventEmitter: AdPlaybackEventEmitter? = null
+    private var mediaTailorSessionEventEmitter: MediaTailorSessionEventEmitter? = null
     private var adBeaconing: AdBeaconing? = null
 
     override val events: Flow<MediaTailorEvent>
@@ -49,6 +50,10 @@ internal class DefaultMediaTailorSessionManager(
                 adPlaybackTracker!!,
                 flowEventEmitter,
             )
+            mediaTailorSessionEventEmitter = dependencyFactory.createMediaTailorSessionEventEmitter(
+                session,
+                flowEventEmitter,
+            )
             adBeaconing = dependencyFactory.createAdBeaconing(
                 player,
                 adPlaybackTracker!!,
@@ -66,6 +71,8 @@ internal class DefaultMediaTailorSessionManager(
         adPlaybackTracker = null
         adPlaybackEventEmitter?.dispose()
         adPlaybackEventEmitter = null
+        mediaTailorSessionEventEmitter?.dispose()
+        mediaTailorSessionEventEmitter = null
         adBeaconing?.dispose()
         adBeaconing = null
         session?.dispose()

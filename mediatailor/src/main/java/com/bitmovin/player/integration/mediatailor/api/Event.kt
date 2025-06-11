@@ -64,6 +64,16 @@ public sealed class MediaTailorEvent(
     ) : MediaTailorEvent()
 
     /**
+     * Emitted when the ad breaks schedule has been updated.
+     */
+    public class AdBreakScheduleUpdated(
+        /**
+         * The list of ad breaks that are currently scheduled.
+         */
+        public val adBreaks: List<MediaTailorAdBreak>,
+    ) : MediaTailorEvent()
+
+    /**
      * Emitted for neutral information provided by [MediaTailorSessionManager].
      */
     public class Info(
