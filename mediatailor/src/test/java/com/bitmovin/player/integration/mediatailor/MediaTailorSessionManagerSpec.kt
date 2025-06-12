@@ -1,6 +1,7 @@
 package com.bitmovin.player.integration.mediatailor
 
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAssetType
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionManager
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
@@ -11,6 +12,7 @@ import com.bitmovin.player.integration.mediatailor.util.DependencyFactory
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -117,6 +119,16 @@ class MediaTailorSessionManagerSpec : UnitSpec({
                     dependencyFactory.createAdBeaconing(any(), any(), any(), any())
                 }
             }
+
+            describe("sending a tracking event") {
+                it("emits an error event") {
+                    mediaTailorSessionManager.sendTrackingEvent(TrackingEvent.ClickTracking)
+                    val slot = slot<MediaTailorEvent>()
+                    verify { eventEmitter.emit(capture(slot)) }
+
+                    expectThat(slot.captured).isA<MediaTailorEvent.Error>()
+                }
+            }
         }
 
         describe("when session is already initialized") {
@@ -140,30 +152,41 @@ class MediaTailorSessionManagerSpec : UnitSpec({
 
                 expectThat(result).isA<SessionInitializationResult.Failure>()
             }
+
+            describe("sending a tracking event") {
+                beforeEach {
+                    coEvery { mediaTailorSession.initialize(any()) } returns Success("")
+                    mediaTailorSessionManager.initializeSession(
+                        sessionConfig = MediaTailorSessionConfig(
+                            sessionInitUrl = "https://example.com/session-init",
+                            assetType = MediaTailorAssetType.Vod,
+                        )
+                    )
+                }
+
+                it("tracks the event using ad beaconing") {
+                    mediaTailorSessionManager.sendTrackingEvent(TrackingEvent.ClickTracking)
+
+                    verify { adBeaconing.track(TrackingEvent.ClickTracking.eventType) }
+                }
+
+                it("tracks other event using ad beaconing") {
+                    mediaTailorSessionManager.sendTrackingEvent(TrackingEvent.Other("otherEvent"))
+
+                    verify { adBeaconing.track("otherEvent") }
+                }
+            }
         }
     }
 
-    describe("sending a tracking event") {
-        beforeEach {
-            coEvery { mediaTailorSession.initialize(any()) } returns Success("")
-            mediaTailorSessionManager.initializeSession(
-                sessionConfig = MediaTailorSessionConfig(
-                    sessionInitUrl = "https://example.com/session-init",
-                    assetType = MediaTailorAssetType.Vod,
-                )
-            )
-        }
-
-        it("tracks the event using ad beaconing") {
+    describe("before media tailor session is initialized") {
+        it("does not allow sending tracking events") {
             mediaTailorSessionManager.sendTrackingEvent(TrackingEvent.ClickTracking)
 
-            verify { adBeaconing.track(TrackingEvent.ClickTracking.eventType) }
-        }
+            val slot = slot<MediaTailorEvent>()
+            verify { eventEmitter.emit(capture(slot)) }
 
-        it("tracks other event using ad beaconing") {
-            mediaTailorSessionManager.sendTrackingEvent(TrackingEvent.Other("otherEvent"))
-
-            verify { adBeaconing.track("otherEvent") }
+            expectThat(slot.captured).isA<MediaTailorEvent.Error>()
         }
     }
 

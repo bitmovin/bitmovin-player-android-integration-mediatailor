@@ -68,7 +68,12 @@ internal class DefaultMediaTailorSessionManager(
     }
 
     override fun sendTrackingEvent(event: TrackingEvent) {
-        adBeaconing?.track(event.eventType)
+        val adBeaconing = adBeaconing
+        if (adBeaconing == null) {
+            flowEventEmitter.emit(MediaTailorEvent.Error("Cannot send tracking events before session is initialized."))
+            return
+        }
+        adBeaconing.track(event.eventType)
     }
 
     override fun stopSession() {
