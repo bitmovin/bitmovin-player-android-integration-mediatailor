@@ -2,8 +2,10 @@ package com.bitmovin.player.integration.mediatailor
 
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.PlayerEvent
+import com.bitmovin.player.integration.mediatailor.api.LinearAdTrackingEvents
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorTrackingEvent
+import com.bitmovin.player.integration.mediatailor.api.PlayerTrackingEvents
 import com.bitmovin.player.integration.mediatailor.eventEmitter.InternalEventEmitter
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
 import com.bitmovin.player.integration.mediatailor.util.Disposable
@@ -13,6 +15,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
+import kotlin.collections.map
+import kotlin.reflect.full.createInstance
 
 internal interface AdBeaconing : Disposable {
     fun track(eventType: String)
@@ -59,7 +63,7 @@ internal class DefaultAdBeaconing(
             ).collect { event ->
                 val trackingEvent = playerToTrackingEvents[event::class]
                 if (trackingEvent != null) {
-                    track(trackingEvent)
+                    track(trackingEvent.eventType)
                 }
             }
         }
@@ -83,29 +87,24 @@ internal class DefaultAdBeaconing(
 }
 
 private val MediaTailorTrackingEvent.isLinearAdMetric: Boolean
-    get() = eventType in linearAdMetricEventTypes
+    get() = eventType in linearAdEventTypes
 
 // Player updates time every 0.2 seconds or so, so we need to account for this inaccuracy
 // when checking if the tracking event should be fired
 private val MediaTailorTrackingEvent.paddedStartTime: ClosedRange<Double>
     get() = scheduleTime - 0.3..scheduleTime + 0.3
 
-private val linearAdMetricEventTypes = setOf(
-    "loaded",
-    "start",
-    "firstQuartile",
-    "midpoint",
-    "thirdQuartile",
-    "complete",
-    "progress",
-    "impression",
-)
+private val linearAdEventTypes = LinearAdTrackingEvents::class
+    .sealedSubclasses
+    .map { it.objectInstance ?: it.createInstance() }
+    .map { it.eventType }
+    .toSet()
 
 private val playerToTrackingEvents = mapOf(
-    PlayerEvent.Muted::class to "mute",
-    PlayerEvent.Unmuted::class to "unmute",
-    PlayerEvent.Play::class to "resume",
-    PlayerEvent.Paused::class to "pause",
-    PlayerEvent.FullscreenEnter::class to "fullscreen",
-    PlayerEvent.FullscreenExit::class to "exitFullscreen",
+    PlayerEvent.Muted::class to PlayerTrackingEvents.Mute,
+    PlayerEvent.Unmuted::class to PlayerTrackingEvents.Unmute,
+    PlayerEvent.Play::class to PlayerTrackingEvents.Resume,
+    PlayerEvent.Paused::class to PlayerTrackingEvents.Pause,
+    PlayerEvent.FullscreenEnter::class to PlayerTrackingEvents.Fullscreen,
+    PlayerEvent.FullscreenExit::class to PlayerTrackingEvents.ExitFullscreen,
 )

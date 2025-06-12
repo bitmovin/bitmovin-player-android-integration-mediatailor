@@ -12,7 +12,10 @@ public class MediaTailorLinearAd(
     public val scheduleTime: Double,
     public val duration: Double,
     public val trackingEvents: List<MediaTailorTrackingEvent>,
-)
+) {
+    public val clickThroughUrl: String?
+        get() = trackingEvents.find { it.eventType == "clickThrough" }?.beaconUrls?.first()
+}
 
 public class MediaTailorTrackingEvent(
     public val id: String,

@@ -2,7 +2,6 @@ package com.bitmovin.player.integration.mediatailor.api
 
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSessionManager
-import com.bitmovin.player.integration.mediatailor.MediaTailorSession
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -67,6 +66,17 @@ public interface MediaTailorSessionManager {
     public suspend fun initializeSession(
         sessionConfig: MediaTailorSessionConfig
     ): SessionInitializationResult
+
+    /**
+     * Send a [TrackingEvent] for currently playing ad.
+     * If there is no currently playing ad or the current ad doesn't contain this tracking event,
+     * it will be ignored.
+     *
+     * Note that [MediaTailorSessionManager] sends the following tracking events automatically:
+     * - [PlayerTrackingEvents]
+     * - [LinearAdTrackingEvents]
+     */
+    public fun sendTrackingEvent(event: TrackingEvent)
 
     /**
      * Stops the current MediaTailor session, if any.

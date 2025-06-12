@@ -2,6 +2,7 @@ package com.bitmovin.player.integration.mediatailor.mediatailorsample
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,6 +26,8 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
+import com.bitmovin.player.integration.mediatailor.api.TrackingEvent
 
 data class UiState(
     val nextAdBreakMessage: String? = null,
@@ -32,6 +35,7 @@ data class UiState(
     val currentAdMessage: String? = null,
     val errorMessage: String? = null,
     val adBreaksMessage: String? = null,
+    val clickThroughUrl: String? = null,
 )
 
 class PlaybackViewModel(application: Application) : AndroidViewModel(application) {
@@ -141,6 +145,7 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 currentAdTimeLeftSeconds,
             )
         }
+        val clickThroughUrl = currentAd.value?.ad?.clickThroughUrl
         val adBreaksMessage = buildString {
             val adBreaks = allAdBreaks.value
             if (adBreaks.isNotEmpty()) {
@@ -166,6 +171,7 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 currentAdBreakMessage = currentAdBreakMessage,
                 currentAdMessage = currentAdMessage,
                 adBreaksMessage = adBreaksMessage,
+                clickThroughUrl = clickThroughUrl,
             )
         }
     }
@@ -173,6 +179,15 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
     override fun onCleared() {
         mediaTailorSessionManager.stopSession()
         player.destroy()
+    }
+
+    fun clickThrough(url: String) {
+        mediaTailorSessionManager.sendTrackingEvent(TrackingEvent.ClickTracking)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = url.toUri()
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        getApplication<Application>().startActivity(intent)
     }
 }
 
