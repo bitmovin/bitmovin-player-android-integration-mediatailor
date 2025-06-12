@@ -5,6 +5,7 @@ import com.bitmovin.player.integration.mediatailor.api.MediaTailorEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionManager
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
+import com.bitmovin.player.integration.mediatailor.api.TrackingEvent
 import com.bitmovin.player.integration.mediatailor.util.DependencyFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -64,6 +65,15 @@ internal class DefaultMediaTailorSessionManager(
         }
 
         sessionInitResult
+    }
+
+    override fun sendTrackingEvent(event: TrackingEvent) {
+        val adBeaconing = adBeaconing
+        if (adBeaconing == null) {
+            flowEventEmitter.emit(MediaTailorEvent.Error("Cannot send tracking events before session is initialized."))
+            return
+        }
+        adBeaconing.track(event.eventType)
     }
 
     override fun stopSession() {
