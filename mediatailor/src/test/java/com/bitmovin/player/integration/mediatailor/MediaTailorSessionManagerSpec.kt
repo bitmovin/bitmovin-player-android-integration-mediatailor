@@ -5,6 +5,7 @@ import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionManager
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult.Success
+import com.bitmovin.player.integration.mediatailor.api.TrackingEvent
 import com.bitmovin.player.integration.mediatailor.eventEmitter.InternalEventEmitter
 import com.bitmovin.player.integration.mediatailor.util.DependencyFactory
 import io.mockk.coEvery
@@ -47,7 +48,12 @@ class MediaTailorSessionManagerSpec : UnitSpec({
             every { createMediaTailorSession(any(), any(), any()) } returns mediaTailorSession
             every { createAdPlaybackTracker(any(), any()) } returns adPlaybackTracker
             every { createAdPlaybackEventEmitter(any(), any()) } returns adPlaybackEventEmitter
-            every { createMediaTailorSessionEventEmitter(any(), any()) } returns mediaTailorSessionEmitter
+            every {
+                createMediaTailorSessionEventEmitter(
+                    any(),
+                    any()
+                )
+            } returns mediaTailorSessionEmitter
             every { createAdBeaconing(any(), any(), any(), any()) } returns adBeaconing
         }
         mediaTailorSessionManager = DefaultMediaTailorSessionManager(
@@ -134,6 +140,30 @@ class MediaTailorSessionManagerSpec : UnitSpec({
 
                 expectThat(result).isA<SessionInitializationResult.Failure>()
             }
+        }
+    }
+
+    describe("sending a tracking event") {
+        beforeEach {
+            coEvery { mediaTailorSession.initialize(any()) } returns Success("")
+            mediaTailorSessionManager.initializeSession(
+                sessionConfig = MediaTailorSessionConfig(
+                    sessionInitUrl = "https://example.com/session-init",
+                    assetType = MediaTailorAssetType.Vod,
+                )
+            )
+        }
+
+        it("tracks the event using ad beaconing") {
+            mediaTailorSessionManager.sendTrackingEvent(TrackingEvent.ClickTracking)
+
+            verify { adBeaconing.track(TrackingEvent.ClickTracking.eventType) }
+        }
+
+        it("tracks other event using ad beaconing") {
+            mediaTailorSessionManager.sendTrackingEvent(TrackingEvent.Other("otherEvent"))
+
+            verify { adBeaconing.track("otherEvent") }
         }
     }
 
