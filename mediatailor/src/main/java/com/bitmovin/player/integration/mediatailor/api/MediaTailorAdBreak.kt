@@ -32,7 +32,10 @@ public class MediaTailorLinearAd(
      * use the [MediaTailorSessionManager.sendTrackingEvent] with [TrackingEvent.ClickTracking].
      */
     public val clickThroughUrl: String?
-        get() = trackingEvents.find { it.eventType == "clickThrough" }?.beaconUrls?.first()
+        get() = trackingEvents
+            .find { it.eventType == "clickThrough" }
+            ?.beaconUrls
+            ?.find { it.isNotBlank() }
 }
 
 public class MediaTailorTrackingEvent(

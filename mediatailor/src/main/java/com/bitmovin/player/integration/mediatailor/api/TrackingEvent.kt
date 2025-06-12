@@ -76,4 +76,17 @@ internal sealed class LinearAdTrackingEvents(
     object Complete : LinearAdTrackingEvents("complete")
     object Progress : LinearAdTrackingEvents("progress")
     object Impression : LinearAdTrackingEvents("impression")
+
+    companion object {
+        val values = setOf(
+            Loaded,
+            Start,
+            FirstQuartile,
+            Midpoint,
+            ThirdQuartile,
+            Complete,
+            Progress,
+            Impression,
+        )
+    }
 }

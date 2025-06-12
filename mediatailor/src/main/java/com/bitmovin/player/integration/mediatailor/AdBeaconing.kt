@@ -15,8 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
-import kotlin.collections.map
-import kotlin.reflect.full.createInstance
 
 internal interface AdBeaconing : Disposable {
     fun track(eventType: String)
@@ -94,9 +92,7 @@ private val MediaTailorTrackingEvent.isLinearAdMetric: Boolean
 private val MediaTailorTrackingEvent.paddedStartTime: ClosedRange<Double>
     get() = scheduleTime - 0.3..scheduleTime + 0.3
 
-private val linearAdEventTypes = LinearAdTrackingEvents::class
-    .sealedSubclasses
-    .map { it.objectInstance ?: it.createInstance() }
+private val linearAdEventTypes = LinearAdTrackingEvents.values
     .map { it.eventType }
     .toSet()
 

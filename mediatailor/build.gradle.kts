@@ -68,7 +68,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(kotlin("reflect"))
 
     testImplementation(libs.bitmovin.player)
     testImplementation(libs.kotlinx.coroutines.test)
