@@ -56,11 +56,21 @@ public sealed class MediaTailorEvent(
     /**
      * Emitted when an upcoming ad break is detected.
      */
-    public class UpcomingAdBreakUpdate(
+    public class UpcomingAdBreakUpdated(
         /**
          * The ad break that is upcoming or `null` if currently no upcoming ad break is known.
          */
         public val adBreak: MediaTailorAdBreak?,
+    ) : MediaTailorEvent()
+
+    /**
+     * Emitted when the ad breaks schedule has been updated.
+     */
+    public class AdBreakScheduleUpdated(
+        /**
+         * The list of ad breaks that are currently scheduled.
+         */
+        public val adBreaks: List<MediaTailorAdBreak>,
     ) : MediaTailorEvent()
 
     /**

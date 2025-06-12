@@ -31,6 +31,7 @@ data class UiState(
     val currentAdBreakMessage: String? = null,
     val currentAdMessage: String? = null,
     val errorMessage: String? = null,
+    val adBreaksMessage: String? = null,
 )
 
 class PlaybackViewModel(application: Application) : AndroidViewModel(application) {
@@ -42,31 +43,24 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
 
     private val nextAdBreak = mediaTailorSessionManager
         .events
-        .filterIsInstance<MediaTailorEvent.UpcomingAdBreakUpdate>()
+        .filterIsInstance<MediaTailorEvent.UpcomingAdBreakUpdated>()
         .map { it.adBreak }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     private val currentAdBreak = mediaTailorSessionManager
         .events
         .filter { it is MediaTailorEvent.AdBreakStarted || it is MediaTailorEvent.AdBreakFinished }
         .map { if (it is MediaTailorEvent.AdBreakStarted) it.adBreak else null }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     private val currentAd = mediaTailorSessionManager
         .events
         .filter { it is MediaTailorEvent.AdStarted || it is MediaTailorEvent.AdFinished }
         .map { it as? MediaTailorEvent.AdStarted }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    private val allAdBreaks = mediaTailorSessionManager
+        .events
+        .filterIsInstance<MediaTailorEvent.AdBreakScheduleUpdated>()
+        .map { it.adBreaks }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     init {
         viewModelScope.launch {
@@ -74,6 +68,12 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 MediaTailorSessionConfig(
                     sessionInitUrl = "https://awslive.streamco.video/v1/session/86dfd1144b3bf786fc967f2c3876972e5548ca5d/awslive/out/v1/live/jdub-live-bitmovin02/cmaf-cbcs/hls.m3u8",
                     assetType = MediaTailorAssetType.Linear(),
+                    sessionInitParams = mapOf(
+                        "playerParams" to mapOf(
+                            "ctp" to "hls",
+                            "iu" to "/21681201340/stan/ctv/hisense/live/sport"
+                        )
+                    )
                 )
             )
             when (val result = sessionResult) {
@@ -108,6 +108,7 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 nextAdBreak,
                 currentAdBreak,
                 currentAd,
+                allAdBreaks,
             ).collect {
                 updateUiState()
             }
@@ -140,12 +141,31 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 currentAdTimeLeftSeconds,
             )
         }
+        val adBreaksMessage = buildString {
+            val adBreaks = allAdBreaks.value
+            if (adBreaks.isNotEmpty()) {
+                append("Ad Breaks:\n")
+                append(
+                    adBreaks.withIndex().joinToString("\n") { (index, value) ->
+                        String.format(
+                            adBreaksMessageFormat,
+                            index + 1,
+                            value.scheduleTime.toInt(),
+                            value.let { it.scheduleTime + it.duration }.toInt(),
+                        )
+                    }
+                )
+            } else {
+                append("No ad breaks scheduled.")
+            }
+        }
 
         _uiState.update {
             UiState(
                 nextAdBreakMessage = upcomingAdBreakMessage,
                 currentAdBreakMessage = currentAdBreakMessage,
                 currentAdMessage = currentAdMessage,
+                adBreaksMessage = adBreaksMessage,
             )
         }
     }
@@ -158,4 +178,5 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
 
 private const val nextAdBreakMessageFormat = "Next ad break in %d s"
 private const val currentAdBreakMessageFormat = "Current ad break ends in %d s"
-private const val currentAdMessageFormat = "Playing ad %d / %d.\nEnds in %d s"
+private const val currentAdMessageFormat = "Playing ad %d / %d. Ends in %d s"
+private const val adBreaksMessageFormat = "Ad Break %d: from: %d to: %d"

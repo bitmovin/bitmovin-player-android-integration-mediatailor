@@ -20,7 +20,7 @@ internal class DefaultAdPlaybackEventEmitter(
     init {
         scope.launch {
             adPlaybackTracker.nextAdBreak.collect {
-                eventEmitter.emit(MediaTailorEvent.UpcomingAdBreakUpdate(it))
+                eventEmitter.emit(MediaTailorEvent.UpcomingAdBreakUpdated(it))
             }
         }
         scope.launch {

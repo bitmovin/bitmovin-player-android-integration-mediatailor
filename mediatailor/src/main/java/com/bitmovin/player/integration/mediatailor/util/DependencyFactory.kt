@@ -10,7 +10,9 @@ import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackEventEmitter
 import com.bitmovin.player.integration.mediatailor.DefaultAdPlaybackTracker
 import com.bitmovin.player.integration.mediatailor.DefaultAdsMapper
 import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSession
+import com.bitmovin.player.integration.mediatailor.DefaultMediaTailorSessionEventEmitter
 import com.bitmovin.player.integration.mediatailor.MediaTailorSession
+import com.bitmovin.player.integration.mediatailor.MediaTailorSessionEventEmitter
 import com.bitmovin.player.integration.mediatailor.eventEmitter.FlowEventEmitter
 import com.bitmovin.player.integration.mediatailor.eventEmitter.InternalEventEmitter
 import com.bitmovin.player.integration.mediatailor.network.DefaultHttpClient
@@ -34,6 +36,14 @@ internal class DependencyFactory {
         eventEmitter: InternalEventEmitter,
     ): AdPlaybackEventEmitter = DefaultAdPlaybackEventEmitter(
         adPlaybackTracker,
+        eventEmitter,
+    )
+
+    fun createMediaTailorSessionEventEmitter(
+        mediaTailorSession: MediaTailorSession,
+        eventEmitter: InternalEventEmitter,
+    ): MediaTailorSessionEventEmitter = DefaultMediaTailorSessionEventEmitter(
+        mediaTailorSession,
         eventEmitter,
     )
 

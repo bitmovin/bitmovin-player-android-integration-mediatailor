@@ -1,7 +1,10 @@
 package com.bitmovin.player.integration.mediatailor.mediatailorsample
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,17 +25,24 @@ fun PlaybackScreen(
             viewModel.player,
         )
 
-        if (uiState.errorMessage != null) {
-            Text(text = "Error: ${uiState.errorMessage}")
-        }
-        if (uiState.nextAdBreakMessage != null) {
-            Text(text = uiState.nextAdBreakMessage)
-        }
-        if (uiState.currentAdBreakMessage != null) {
-            Text(text = uiState.currentAdBreakMessage)
-        }
-        if (uiState.currentAdMessage != null) {
-            Text(text = uiState.currentAdMessage)
+        Column(Modifier.padding(16.dp)) {
+            if (uiState.errorMessage != null) {
+                Text(text = "Error: ${uiState.errorMessage}")
+            }
+            if (uiState.adBreaksMessage != null) {
+                Text(text = uiState.adBreaksMessage)
+            }
+            if (uiState.nextAdBreakMessage != null) {
+                Spacer(Modifier.height(16.dp))
+                Text(text = uiState.nextAdBreakMessage)
+            }
+            if (uiState.currentAdBreakMessage != null) {
+                Spacer(Modifier.height(16.dp))
+                Text(text = uiState.currentAdBreakMessage)
+            }
+            if (uiState.currentAdMessage != null) {
+                Text(text = uiState.currentAdMessage)
+            }
         }
     }
 }

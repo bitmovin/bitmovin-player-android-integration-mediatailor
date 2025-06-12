@@ -26,6 +26,7 @@ import util.unmockkPlayerExtension
 class MediaTailorSessionManagerSpec : UnitSpec({
     lateinit var adPlaybackTracker: AdPlaybackTracker
     lateinit var adPlaybackEventEmitter: AdPlaybackEventEmitter
+    lateinit var mediaTailorSessionEmitter: MediaTailorSessionEventEmitter
     lateinit var adBeaconing: AdBeaconing
     lateinit var eventEmitter: InternalEventEmitter
     lateinit var mediaTailorSession: MediaTailorSession
@@ -35,6 +36,7 @@ class MediaTailorSessionManagerSpec : UnitSpec({
     beforeEach {
         adPlaybackTracker = mockk(relaxed = true)
         adPlaybackEventEmitter = mockk(relaxed = true)
+        mediaTailorSessionEmitter = mockk(relaxed = true)
         adBeaconing = mockk(relaxed = true)
         eventEmitter = mockk(relaxed = true)
         mediaTailorSession = mockk(relaxed = true)
@@ -45,6 +47,7 @@ class MediaTailorSessionManagerSpec : UnitSpec({
             every { createMediaTailorSession(any(), any(), any()) } returns mediaTailorSession
             every { createAdPlaybackTracker(any(), any()) } returns adPlaybackTracker
             every { createAdPlaybackEventEmitter(any(), any()) } returns adPlaybackEventEmitter
+            every { createMediaTailorSessionEventEmitter(any(), any()) } returns mediaTailorSessionEmitter
             every { createAdBeaconing(any(), any(), any(), any()) } returns adBeaconing
         }
         mediaTailorSessionManager = DefaultMediaTailorSessionManager(
@@ -80,6 +83,7 @@ class MediaTailorSessionManagerSpec : UnitSpec({
                 verify {
                     dependencyFactory.createAdPlaybackTracker(any(), any())
                     dependencyFactory.createAdPlaybackEventEmitter(any(), any())
+                    dependencyFactory.createMediaTailorSessionEventEmitter(any(), any())
                     dependencyFactory.createAdBeaconing(any(), any(), any(), any())
                 }
             }
@@ -103,6 +107,7 @@ class MediaTailorSessionManagerSpec : UnitSpec({
                 verify(exactly = 0) {
                     dependencyFactory.createAdPlaybackTracker(any(), any())
                     dependencyFactory.createAdPlaybackEventEmitter(any(), any())
+                    dependencyFactory.createMediaTailorSessionEventEmitter(any(), any())
                     dependencyFactory.createAdBeaconing(any(), any(), any(), any())
                 }
             }
@@ -150,6 +155,7 @@ class MediaTailorSessionManagerSpec : UnitSpec({
                 mediaTailorSession.dispose()
                 adPlaybackTracker.dispose()
                 adPlaybackEventEmitter.dispose()
+                mediaTailorSessionEmitter.dispose()
                 adBeaconing.dispose()
             }
         }
