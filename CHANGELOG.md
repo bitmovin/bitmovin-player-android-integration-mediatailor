@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [0.1.0] - YYYY-MM-DD
+## [0.1.0-alpha.6] - 2025-07-03
 
 ### Added
 
-- 
+- Initial alpha release of the MediaTailor integration for Bitmovin Player Android
