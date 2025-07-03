@@ -1,0 +1,252 @@
+public abstract class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents : com/bitmovin/player/integration/mediatailor/api/TrackingEvent {
+	public static final field Companion Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Companion {
+	public final fun getValues ()Ljava/util/Set;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Complete : com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Complete;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$FirstQuartile : com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$FirstQuartile;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Impression : com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Impression;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Loaded : com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Loaded;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Midpoint : com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Midpoint;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Progress : com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Progress;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Start : com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$Start;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$ThirdQuartile : com/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/LinearAdTrackingEvents$ThirdQuartile;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/LinearAssetTypeConfig {
+	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getTrackingRequestPollFrequency-UwyO8pc ()J
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;DDLjava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;DDLjava/lang/String;Ljava/lang/String;)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;
+	public static synthetic fun copy$default (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;Ljava/lang/String;Ljava/util/List;DDLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdMarkerDuration ()Ljava/lang/String;
+	public final fun getAds ()Ljava/util/List;
+	public final fun getDuration ()D
+	public final fun getFormattedDuration ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getScheduleTime ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType {
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType$Linear : com/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType {
+	public fun <init> ()V
+	public fun <init> (Lcom/bitmovin/player/integration/mediatailor/api/LinearAssetTypeConfig;)V
+	public synthetic fun <init> (Lcom/bitmovin/player/integration/mediatailor/api/LinearAssetTypeConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getConfig ()Lcom/bitmovin/player/integration/mediatailor/api/LinearAssetTypeConfig;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType$Vod : com/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType$Vod;
+}
+
+public abstract class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getTimestamp ()J
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent$AdBreakFinished : com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public fun <init> (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;)V
+	public final fun getAdBreak ()Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent$AdBreakScheduleUpdated : com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public fun <init> (Ljava/util/List;)V
+	public final fun getAdBreaks ()Ljava/util/List;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent$AdBreakStarted : com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public fun <init> (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;)V
+	public final fun getAdBreak ()Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent$AdFinished : com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public fun <init> (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorLinearAd;)V
+	public final fun getAd ()Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorLinearAd;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent$AdStarted : com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public fun <init> (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorLinearAd;I)V
+	public final fun getAd ()Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorLinearAd;
+	public final fun getIndexInQueue ()I
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent$Error : com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getMessage ()Ljava/lang/String;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent$Info : com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getMessage ()Ljava/lang/String;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent$UpcomingAdBreakUpdated : com/bitmovin/player/integration/mediatailor/api/MediaTailorEvent {
+	public fun <init> (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;)V
+	public final fun getAdBreak ()Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAdBreak;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorLinearAd {
+	public fun <init> (Ljava/lang/String;DDLjava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;DDLjava/lang/String;Ljava/util/List;)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorLinearAd;
+	public static synthetic fun copy$default (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorLinearAd;Ljava/lang/String;DDLjava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorLinearAd;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClickThroughUrl ()Ljava/lang/String;
+	public final fun getDuration ()D
+	public final fun getFormattedDuration ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getScheduleTime ()D
+	public final fun getTrackingEvents ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorSessionConfig {
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType;Z)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorSessionConfig;
+	public static synthetic fun copy$default (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorSessionConfig;Ljava/lang/String;Ljava/util/Map;Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType;ZILjava/lang/Object;)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorSessionConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAssetType ()Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorAssetType;
+	public final fun getAutomaticAdTrackingEnabled ()Z
+	public final fun getSessionInitParams ()Ljava/util/Map;
+	public final fun getSessionInitUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/bitmovin/player/integration/mediatailor/api/MediaTailorSessionManager {
+	public abstract fun destroy ()V
+	public abstract fun getEvents ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun initializeSession (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorSessionConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendTrackingEvent (Lcom/bitmovin/player/integration/mediatailor/api/TrackingEvent;)V
+	public abstract fun stopSession ()V
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorSessionManagerKt {
+	public static final fun MediaTailorSessionManager (Lcom/bitmovin/player/api/Player;)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorSessionManager;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/MediaTailorTrackingEvent {
+	public fun <init> (Ljava/lang/String;DDLjava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;DDLjava/lang/String;Ljava/util/List;)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorTrackingEvent;
+	public static synthetic fun copy$default (Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorTrackingEvent;Ljava/lang/String;DDLjava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/bitmovin/player/integration/mediatailor/api/MediaTailorTrackingEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBeaconUrls ()Ljava/util/List;
+	public final fun getDuration ()D
+	public final fun getEventType ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getScheduleTime ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents : com/bitmovin/player/integration/mediatailor/api/TrackingEvent {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$ExitFullscreen : com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$ExitFullscreen;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Fullscreen : com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Fullscreen;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Mute : com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Mute;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Pause : com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Pause;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Resume : com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Resume;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Unmute : com/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/PlayerTrackingEvents$Unmute;
+}
+
+public abstract class com/bitmovin/player/integration/mediatailor/api/SessionInitializationResult {
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/SessionInitializationResult$Failure : com/bitmovin/player/integration/mediatailor/api/SessionInitializationResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getMessage ()Ljava/lang/String;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/SessionInitializationResult$Success : com/bitmovin/player/integration/mediatailor/api/SessionInitializationResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getManifestUrl ()Ljava/lang/String;
+}
+
+public abstract class com/bitmovin/player/integration/mediatailor/api/TrackingEvent {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getEventType ()Ljava/lang/String;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/TrackingEvent$ClickTracking : com/bitmovin/player/integration/mediatailor/api/TrackingEvent {
+	public static final field INSTANCE Lcom/bitmovin/player/integration/mediatailor/api/TrackingEvent$ClickTracking;
+}
+
+public final class com/bitmovin/player/integration/mediatailor/api/TrackingEvent$Other : com/bitmovin/player/integration/mediatailor/api/TrackingEvent {
+	public fun <init> (Ljava/lang/String;)V
+}
+
