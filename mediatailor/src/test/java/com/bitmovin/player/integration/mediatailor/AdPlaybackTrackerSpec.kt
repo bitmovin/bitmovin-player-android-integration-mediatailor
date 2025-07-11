@@ -506,7 +506,6 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                 expectThat(adPlaybackTracker.playingAdBreak.value?.adBreak).isEqualTo(firstAdBreak)
                 expectThat(adPlaybackTracker.playingAdBreak.value?.adIndex).isEqualTo(1)
             }
-
         }
 
         describe("when the player moves directly into the second ad break with only one ad") {
