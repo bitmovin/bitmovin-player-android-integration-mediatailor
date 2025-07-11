@@ -1,4 +1,5 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
@@ -8,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- `IndexOutOfBoundsException` when jumping from an ad break to another ad break with less ads then the previous active ad index
 - `MediaTailorSessionManager` not emitting all ad related events when seeking or time shifting from an active ad break to another ad break
 
 ## [0.1.0-alpha.6] - 2025-07-03
