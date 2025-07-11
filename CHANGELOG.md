@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `MediaTailorSessionManager` not emitting all ad related events when seeking or time shifting from an active ad break to another ad break
+
 ## [0.1.0-alpha.6] - 2025-07-03
 
 ### Added
