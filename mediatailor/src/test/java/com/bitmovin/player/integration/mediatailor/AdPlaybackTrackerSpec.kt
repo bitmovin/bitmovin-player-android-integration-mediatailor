@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -383,11 +384,18 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         formattedDuration = "3",
                         trackingEvents = listOf(),
                     ),
+                    MediaTailorLinearAd(
+                        id = "ad2",
+                        scheduleTime = 7.0,
+                        duration = 1.0,
+                        formattedDuration = "1",
+                        trackingEvents = listOf(),
+                    ),
                 ),
                 scheduleTime = 4.0,
-                duration = 3.0,
-                formattedDuration = "3",
-                adMarkerDuration = "3",
+                duration = 4.0,
+                formattedDuration = "4",
+                adMarkerDuration = "4",
             )
             secondAdBreak = MediaTailorAdBreak(
                 id = "adBreak2",
@@ -444,6 +452,86 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
                 expectThat(adPlaybackTracker.playingAdBreak.value).isNull()
                 expectThat(adPlaybackTracker.nextAdBreak.value).isNull()
+            }
+        }
+    }
+
+    describe("when the player moves from one ad break to another") {
+        val timeChangedFlow = MutableSharedFlow<PlayerEvent.TimeChanged>()
+        lateinit var firstAdBreak: MediaTailorAdBreak
+        lateinit var secondAdBreak: MediaTailorAdBreak
+
+        beforeEach {
+            createPlayer(
+                currentTime = 1.5,
+                timeChangedFlow = timeChangedFlow,
+            )
+            firstAdBreak = MediaTailorAdBreak(
+                id = "adBreak1",
+                ads = listOf(
+                    MediaTailorLinearAd(
+                        id = "ad1",
+                        scheduleTime = 0.0,
+                        duration = 1.0,
+                        formattedDuration = "1",
+                        trackingEvents = listOf(),
+                    ),
+                    MediaTailorLinearAd(
+                        id = "ad2",
+                        scheduleTime = 1.0,
+                        duration = 1.0,
+                        formattedDuration = "1",
+                        trackingEvents = listOf(),
+                    ),
+                ),
+                scheduleTime = 0.0,
+                duration = 2.0,
+                formattedDuration = "2",
+                adMarkerDuration = "2",
+            )
+            secondAdBreak = MediaTailorAdBreak(
+                id = "adBreak2",
+                ads = listOf(
+                    MediaTailorLinearAd(
+                        id = "ad1",
+                        scheduleTime = 3.0,
+                        duration = 1.0,
+                        formattedDuration = "1",
+                        trackingEvents = listOf(),
+                    ),
+                ),
+                scheduleTime = 3.0,
+                duration = 1.0,
+                formattedDuration = "1",
+                adMarkerDuration = "1",
+            )
+            createAdPlaybackTracker(listOf(firstAdBreak, secondAdBreak))
+        }
+
+        describe("when the player starts in the second ad in the first ad break") {
+            it("selects the correct ad index initially") {
+                expectThat(adPlaybackTracker.playingAdBreak.value?.adBreak).isEqualTo(firstAdBreak)
+                expectThat(adPlaybackTracker.playingAdBreak.value?.adIndex).isEqualTo(1)
+            }
+
+        }
+
+        describe("when the player moves directly into the second ad break with only one ad") {
+            beforeEach {
+                every { player.currentTime } returns 3.5
+            }
+
+            it("does not crash") {
+                runTest {
+                    timeChangedFlow.emit(PlayerEvent.TimeChanged(3.5))
+                }
+            }
+
+            it("selects the first ad in the second ad break") {
+                timeChangedFlow.emit(PlayerEvent.TimeChanged(3.5))
+
+                expectThat(adPlaybackTracker.playingAdBreak.value?.adBreak).isEqualTo(secondAdBreak)
+                expectThat(adPlaybackTracker.playingAdBreak.value?.adIndex).isEqualTo(0)
             }
         }
     }

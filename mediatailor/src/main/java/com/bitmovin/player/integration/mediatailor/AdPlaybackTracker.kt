@@ -79,6 +79,7 @@ internal class DefaultAdPlaybackTracker(
             player.currentTime >= adBreaks[currentAdBreakIndex].endTime
         ) {
             currentAdBreakIndex++
+            currentAdIndex = 0
         }
 
         val adBreak = adBreaks[currentAdBreakIndex]
@@ -98,7 +99,6 @@ internal class DefaultAdPlaybackTracker(
 
         if (player.currentTime !in adBreak.startToEndTime) {
             _playingAdBreak.update { null }
-            currentAdIndex = 0
             return
         }
 
