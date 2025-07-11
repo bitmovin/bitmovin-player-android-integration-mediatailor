@@ -384,18 +384,11 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         formattedDuration = "3",
                         trackingEvents = listOf(),
                     ),
-                    MediaTailorLinearAd(
-                        id = "ad2",
-                        scheduleTime = 7.0,
-                        duration = 1.0,
-                        formattedDuration = "1",
-                        trackingEvents = listOf(),
-                    ),
                 ),
                 scheduleTime = 4.0,
-                duration = 4.0,
-                formattedDuration = "4",
-                adMarkerDuration = "4",
+                duration = 3.0,
+                formattedDuration = "3",
+                adMarkerDuration = "3",
             )
             secondAdBreak = MediaTailorAdBreak(
                 id = "adBreak2",
