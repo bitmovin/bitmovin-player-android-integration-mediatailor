@@ -25,6 +25,7 @@ internal class DefaultAdPlaybackEventEmitter(
         }
         scope.launch {
             adPlaybackTracker.playingAdBreak.collect { playingAdBreak ->
+                val previousPlayingAdBreak = previousPlayingAdBreak
                 when {
                     previousPlayingAdBreak == null && playingAdBreak != null -> {
                         eventEmitter.emit(MediaTailorEvent.AdBreakStarted(playingAdBreak.adBreak))
@@ -36,9 +37,22 @@ internal class DefaultAdPlaybackEventEmitter(
                         )
                     }
 
+                    previousPlayingAdBreak != null && playingAdBreak != null &&
+                        previousPlayingAdBreak.adBreak.id != playingAdBreak.adBreak.id -> {
+                        eventEmitter.emit(MediaTailorEvent.AdFinished(previousPlayingAdBreak.ad))
+                        eventEmitter.emit(MediaTailorEvent.AdBreakFinished(previousPlayingAdBreak.adBreak))
+                        eventEmitter.emit(MediaTailorEvent.AdBreakStarted(playingAdBreak.adBreak))
+                        eventEmitter.emit(
+                            MediaTailorEvent.AdStarted(
+                                ad = playingAdBreak.ad,
+                                indexInQueue = playingAdBreak.adIndex,
+                            ),
+                        )
+                    }
+
                     playingAdBreak != null && previousPlayingAdBreak?.ad?.id != playingAdBreak.ad.id -> {
                         if (previousPlayingAdBreak?.ad != null) {
-                            eventEmitter.emit(MediaTailorEvent.AdFinished(previousPlayingAdBreak!!.ad))
+                            eventEmitter.emit(MediaTailorEvent.AdFinished(previousPlayingAdBreak.ad))
                         }
                         eventEmitter.emit(
                             MediaTailorEvent.AdStarted(
@@ -49,12 +63,12 @@ internal class DefaultAdPlaybackEventEmitter(
                     }
 
                     previousPlayingAdBreak != null && playingAdBreak == null -> {
-                        eventEmitter.emit(MediaTailorEvent.AdFinished(previousPlayingAdBreak!!.ad))
-                        eventEmitter.emit(MediaTailorEvent.AdBreakFinished(previousPlayingAdBreak!!.adBreak))
+                        eventEmitter.emit(MediaTailorEvent.AdFinished(previousPlayingAdBreak.ad))
+                        eventEmitter.emit(MediaTailorEvent.AdBreakFinished(previousPlayingAdBreak.adBreak))
                     }
                 }
 
-                previousPlayingAdBreak = playingAdBreak
+                this@DefaultAdPlaybackEventEmitter.previousPlayingAdBreak = playingAdBreak
             }
         }
     }
