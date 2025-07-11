@@ -155,6 +155,69 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
             }
         }
 
+        describe("when the ad break changes") {
+            beforeEach {
+                playingAdBreak.emit(
+                    PlayingAdBreak(
+                        adBreak = MediaTailorAdBreak(
+                            id = "adBreak2",
+                            ads = listOf(
+                                MediaTailorLinearAd(
+                                    id = "ad2",
+                                    scheduleTime = 0.0,
+                                    duration = 10.0,
+                                    formattedDuration = "10",
+                                    trackingEvents = emptyList(),
+                                ),
+                            ),
+                            scheduleTime = 0.0,
+                            duration = 10.0,
+                            formattedDuration = "10",
+                            adMarkerDuration = "10",
+                        ),
+                        adIndex = 0,
+                    ),
+                )
+            }
+
+            it("emits ad break finished event for the previous ad break") {
+                expectThat(testEventEmitter.emittedEvents).any {
+                    isA<MediaTailorEvent.AdBreakFinished>()
+                        .and {
+                            get { adBreak.id }.isEqualTo("adBreak1")
+                        }
+                }
+            }
+
+            it("emits ad finished event for the previous ad") {
+                expectThat(testEventEmitter.emittedEvents).any {
+                    isA<MediaTailorEvent.AdFinished>()
+                        .and {
+                            get { ad.id }.isEqualTo("ad1")
+                        }
+                }
+            }
+
+            it("emits ad break started event for the new ad break") {
+                expectThat(testEventEmitter.emittedEvents).any {
+                    isA<MediaTailorEvent.AdBreakStarted>()
+                        .and {
+                            get { adBreak.id }.isEqualTo("adBreak2")
+                        }
+                }
+            }
+
+            it("emits ad started event for the new ad") {
+                expectThat(testEventEmitter.emittedEvents).any {
+                    isA<MediaTailorEvent.AdStarted>()
+                        .and {
+                            get { ad.id }.isEqualTo("ad2")
+                            get { indexInQueue }.isEqualTo(0)
+                        }
+                }
+            }
+        }
+
         describe("when the current ad changes") {
             beforeEach {
                 playingAdBreak.emit(
