@@ -82,12 +82,15 @@ internal class DefaultAdPlaybackTracker(
             currentAdIndex = 0
         }
 
-        val adBreak = adBreaks[currentAdBreakIndex]
+        // this is to handle scenarios where ad avails shrink mid stream
+        val adBreak = adBreaks.getOrNull(currentAdBreakIndex) //adBreaks[currentAdBreakIndex]
         when {
-            player.currentTime < adBreak.scheduleTime -> {
+            // not playing currentAdBreakIndex; hence schedule this as the next adbreak
+            adBreak != null && player.currentTime < adBreak.scheduleTime -> {
                 _nextAdBreak.update { adBreak }
             }
 
+            // already playing this currentAdBreakIndex; hence schedule the currentAdBreakIndex+1 as next adbreak
             adBreaks.getOrNull(currentAdBreakIndex + 1) != null -> {
                 _nextAdBreak.update { adBreaks[currentAdBreakIndex + 1] }
             }
@@ -97,25 +100,29 @@ internal class DefaultAdPlaybackTracker(
             }
         }
 
-        if (player.currentTime !in adBreak.startToEndTime) {
-            _playingAdBreak.update { null }
-            return
-        }
+        if (adBreak == null) {
+            throw UnsupportedOperationException("Ad break being played is null in Manifest update. ${playingAdBreak.value}")
+        } else {
+            if (player.currentTime !in adBreak.startToEndTime) {
+                _playingAdBreak.update { null }
+                return
+            }
 
-        val ads = adBreak.ads
-        while (currentAdIndex < ads.lastIndex &&
-            player.currentTime >= ads[currentAdIndex].endTime
-        ) {
-            currentAdIndex++
-        }
+            val ads = adBreak.ads
+            while (currentAdIndex < ads.lastIndex &&
+                player.currentTime >= ads[currentAdIndex].endTime
+            ) {
+                currentAdIndex++
+            }
 
-        val ad = ads[currentAdIndex]
-        if (player.currentTime in ad.startToEndTime) {
-            _playingAdBreak.update {
-                PlayingAdBreak(
-                    adBreak = adBreak,
-                    adIndex = currentAdIndex,
-                )
+            val ad = ads[currentAdIndex]
+            if (player.currentTime in ad.startToEndTime) {
+                _playingAdBreak.update {
+                    PlayingAdBreak(
+                        adBreak = adBreak,
+                        adIndex = currentAdIndex,
+                    )
+                }
             }
         }
     }
