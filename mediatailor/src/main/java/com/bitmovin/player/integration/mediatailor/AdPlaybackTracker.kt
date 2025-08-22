@@ -78,7 +78,9 @@ internal class DefaultAdPlaybackTracker(
      * It assumes that ad breaks are sorted by schedule time.
      */
     private fun trackAdBreaks(adBreaks: List<MediaTailorAdBreak>) {
-        val adBreaks = adBreaks.takeIf { it.isNotEmpty() } ?: return
+        if (adBreaks.isEmpty()) {
+            return
+        }
 
         while (currentAdBreakIndex < adBreaks.lastIndex &&
             player.currentTime >= adBreaks[currentAdBreakIndex].endTime
