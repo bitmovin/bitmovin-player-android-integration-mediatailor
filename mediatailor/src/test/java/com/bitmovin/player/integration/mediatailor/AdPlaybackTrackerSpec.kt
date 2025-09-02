@@ -88,7 +88,8 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
         describe("with an ad break in the present") {
             lateinit var adBreak: MediaTailorAdBreak
-            lateinit var timeChangedFlow : MutableSharedFlow<PlayerEvent.TimeChanged>
+            lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
             beforeEach {
                 timeChangedFlow = MutableSharedFlow()
                 createPlayer(currentTime = 5.0, timeChangedFlow)
@@ -119,6 +120,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
         describe("with an ad break in the past") {
             lateinit var adBreak: MediaTailorAdBreak
+
             beforeEach {
                 createPlayer(currentTime = 5.0)
                 adBreak = MediaTailorAdBreak(
@@ -139,7 +141,8 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
         describe("with an ad break in the future") {
             lateinit var adBreak: MediaTailorAdBreak
-            lateinit var timeChangedFlow : MutableSharedFlow<PlayerEvent.TimeChanged>
+            lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
             beforeEach {
                 timeChangedFlow = MutableSharedFlow()
                 createPlayer(currentTime = 5.0, timeChangedFlow)
@@ -167,7 +170,8 @@ class AdPlaybackTrackerSpec : DescribeSpec({
         describe("with ad break in the past future and current ad break") {
             lateinit var currentAdBreak: MediaTailorAdBreak
             lateinit var nextAdBreak: MediaTailorAdBreak
-            lateinit var timeChangedFlow : MutableSharedFlow<PlayerEvent.TimeChanged>
+            lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
             beforeEach {
                 timeChangedFlow = MutableSharedFlow()
                 createPlayer(currentTime = 5.0, timeChangedFlow)
@@ -248,7 +252,8 @@ class AdPlaybackTrackerSpec : DescribeSpec({
             )
 
             describe("when the player time is at first ad") {
-                lateinit var timeChangedFlow : MutableSharedFlow<PlayerEvent.TimeChanged>
+                lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
                 beforeEach {
                     timeChangedFlow = MutableSharedFlow()
                     createPlayer(currentTime = 5.0, timeChangedFlow)
@@ -266,7 +271,8 @@ class AdPlaybackTrackerSpec : DescribeSpec({
             }
 
             describe("when the player time is at second ad") {
-                lateinit var timeChangedFlow : MutableSharedFlow<PlayerEvent.TimeChanged>
+                lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
                 beforeEach {
                     timeChangedFlow = MutableSharedFlow()
                     createPlayer(currentTime = 10.0, timeChangedFlow)
@@ -284,7 +290,8 @@ class AdPlaybackTrackerSpec : DescribeSpec({
             }
 
             describe("when the player time is at third ad") {
-                lateinit var timeChangedFlow : MutableSharedFlow<PlayerEvent.TimeChanged>
+                lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
                 beforeEach {
                     timeChangedFlow = MutableSharedFlow()
                     createPlayer(currentTime = 15.0, timeChangedFlow)

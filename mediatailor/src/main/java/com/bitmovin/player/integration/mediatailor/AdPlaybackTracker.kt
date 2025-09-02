@@ -8,13 +8,10 @@ import com.bitmovin.player.integration.mediatailor.util.Disposable
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -51,7 +48,7 @@ internal class DefaultAdPlaybackTracker(
 
     init {
         scope.launch {
-            stateShouldBeInvalidatedFlow().runAndCancelOnCollect {
+            stateShouldBeInvalidatedFlow().collectLatest {
                 currentAdBreakIndex = 0
                 currentAdIndex = 0
                 val adBreaks = mediaTailorSession.adBreaks.value
@@ -129,17 +126,6 @@ internal class DefaultAdPlaybackTracker(
 
     override fun dispose() {
         scope.cancel()
-    }
-}
-
-private suspend fun Flow<Any>.runAndCancelOnCollect(block: suspend () -> Unit) = coroutineScope {
-    var job: Job? = null
-
-    collect {
-        job?.cancelAndJoin()
-        job = launch {
-            block()
-        }
     }
 }
 
