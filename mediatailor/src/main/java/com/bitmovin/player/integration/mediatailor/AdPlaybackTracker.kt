@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -47,24 +48,25 @@ internal class DefaultAdPlaybackTracker(
 
     init {
         scope.launch {
-            player.eventFlow<PlayerEvent.TimeChanged>().collect {
-                trackAdBreaks()
-            }
-        }
-        scope.launch {
-            merge(
-                // When seeking or time shifting, the calculated ad breaks are most likely outdated
-                player.eventFlow<PlayerEvent.Seeked>(),
-                player.eventFlow<PlayerEvent.TimeShifted>(),
-                // In case ad breaks are updated before the tail the indices might point to an invalid ad break
-                mediaTailorSession.adBreaks,
-            ).collect {
+            stateShouldBeInvalidatedFlow().collectLatest {
                 currentAdBreakIndex = 0
                 currentAdIndex = 0
-                trackAdBreaks()
+                val adBreaks = mediaTailorSession.adBreaks.value
+
+                player.eventFlow<PlayerEvent.TimeChanged>().collect {
+                    trackAdBreaks(adBreaks)
+                }
             }
         }
     }
+
+    private fun stateShouldBeInvalidatedFlow() = merge(
+        // When seeking or time shifting, the calculated ad breaks are most likely outdated
+        player.eventFlow<PlayerEvent.Seeked>(),
+        player.eventFlow<PlayerEvent.TimeShifted>(),
+        // In case ad breaks are updated before the tail the indices might point to an invalid ad break
+        mediaTailorSession.adBreaks,
+    )
 
     /**
      * This function uses [currentAdBreakIndex] and [currentAdIndex] to track the current position
@@ -72,8 +74,10 @@ internal class DefaultAdPlaybackTracker(
      *
      * It assumes that ad breaks are sorted by schedule time.
      */
-    private fun trackAdBreaks() {
-        val adBreaks = mediaTailorSession.adBreaks.value.takeIf { it.isNotEmpty() } ?: return
+    private fun trackAdBreaks(adBreaks: List<MediaTailorAdBreak>) {
+        if (adBreaks.isEmpty()) {
+            return
+        }
 
         while (currentAdBreakIndex < adBreaks.lastIndex &&
             player.currentTime >= adBreaks[currentAdBreakIndex].endTime

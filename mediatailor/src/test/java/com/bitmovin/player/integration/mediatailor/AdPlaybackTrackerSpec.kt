@@ -88,8 +88,11 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
         describe("with an ad break in the present") {
             lateinit var adBreak: MediaTailorAdBreak
+            lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
             beforeEach {
-                createPlayer(currentTime = 5.0)
+                timeChangedFlow = MutableSharedFlow()
+                createPlayer(currentTime = 5.0, timeChangedFlow)
                 adBreak = MediaTailorAdBreak(
                     id = "adBreak1",
                     ads = listOf(
@@ -107,6 +110,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                     adMarkerDuration = "5",
                 )
                 createAdPlaybackTracker(listOf(adBreak))
+                timeChangedFlow.emit(PlayerEvent.TimeChanged(5.0))
             }
 
             it("currentAdBreak is the correct adBreak") {
@@ -116,6 +120,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
         describe("with an ad break in the past") {
             lateinit var adBreak: MediaTailorAdBreak
+
             beforeEach {
                 createPlayer(currentTime = 5.0)
                 adBreak = MediaTailorAdBreak(
@@ -136,8 +141,11 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
         describe("with an ad break in the future") {
             lateinit var adBreak: MediaTailorAdBreak
+            lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
             beforeEach {
-                createPlayer(currentTime = 5.0)
+                timeChangedFlow = MutableSharedFlow()
+                createPlayer(currentTime = 5.0, timeChangedFlow)
                 adBreak = MediaTailorAdBreak(
                     id = "adBreak1",
                     ads = listOf(),
@@ -147,6 +155,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                     adMarkerDuration = "5",
                 )
                 createAdPlaybackTracker(listOf(adBreak))
+                timeChangedFlow.emit(PlayerEvent.TimeChanged(5.0))
             }
 
             it("currentAdBreak is null") {
@@ -161,8 +170,11 @@ class AdPlaybackTrackerSpec : DescribeSpec({
         describe("with ad break in the past future and current ad break") {
             lateinit var currentAdBreak: MediaTailorAdBreak
             lateinit var nextAdBreak: MediaTailorAdBreak
+            lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
             beforeEach {
-                createPlayer(currentTime = 5.0)
+                timeChangedFlow = MutableSharedFlow()
+                createPlayer(currentTime = 5.0, timeChangedFlow)
                 currentAdBreak = MediaTailorAdBreak(
                     id = "adBreak1",
                     ads = listOf(
@@ -196,6 +208,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                     adMarkerDuration = "5",
                 )
                 createAdPlaybackTracker(listOf(currentAdBreak, nextAdBreak))
+                timeChangedFlow.emit(PlayerEvent.TimeChanged(5.0))
             }
 
             it("currentAdBreak is the correct adBreak") {
@@ -239,9 +252,13 @@ class AdPlaybackTrackerSpec : DescribeSpec({
             )
 
             describe("when the player time is at first ad") {
+                lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
                 beforeEach {
-                    createPlayer(currentTime = 5.0)
+                    timeChangedFlow = MutableSharedFlow()
+                    createPlayer(currentTime = 5.0, timeChangedFlow)
                     createAdPlaybackTracker(listOf(adBreak))
+                    timeChangedFlow.emit(PlayerEvent.TimeChanged(5.0))
                 }
 
                 it("current ad is the first ad") {
@@ -254,9 +271,13 @@ class AdPlaybackTrackerSpec : DescribeSpec({
             }
 
             describe("when the player time is at second ad") {
+                lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
                 beforeEach {
-                    createPlayer(currentTime = 10.0)
+                    timeChangedFlow = MutableSharedFlow()
+                    createPlayer(currentTime = 10.0, timeChangedFlow)
                     createAdPlaybackTracker(listOf(adBreak))
+                    timeChangedFlow.emit(PlayerEvent.TimeChanged(10.0))
                 }
 
                 it("current ad is the second ad") {
@@ -269,9 +290,13 @@ class AdPlaybackTrackerSpec : DescribeSpec({
             }
 
             describe("when the player time is at third ad") {
+                lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+
                 beforeEach {
-                    createPlayer(currentTime = 15.0)
+                    timeChangedFlow = MutableSharedFlow()
+                    createPlayer(currentTime = 15.0, timeChangedFlow)
                     createAdPlaybackTracker(listOf(adBreak))
+                    timeChangedFlow.emit(PlayerEvent.TimeChanged(15.0))
                 }
 
                 it("current ad is the third ad") {
@@ -287,6 +312,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
     describe("when player receives seeking and time shifting events") {
         val timeShiftedFlow = MutableSharedFlow<PlayerEvent.TimeShifted>()
+        val timeChangedFlow = MutableSharedFlow<PlayerEvent.TimeChanged>()
         val seekedFlow = MutableSharedFlow<PlayerEvent.Seeked>()
         lateinit var firstAdBreak: MediaTailorAdBreak
         lateinit var secondAdBreak: MediaTailorAdBreak
@@ -296,6 +322,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                 currentTime = 5.0,
                 timeShiftedFlow = timeShiftedFlow,
                 seekedFlow = seekedFlow,
+                timeChangedFlow = timeChangedFlow,
             )
             firstAdBreak = MediaTailorAdBreak(
                 id = "adBreak1",
@@ -330,6 +357,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                 adMarkerDuration = "5",
             )
             createAdPlaybackTracker(listOf(firstAdBreak, secondAdBreak))
+            timeChangedFlow.emit(PlayerEvent.TimeChanged(5.0))
         }
 
         describe("before the time shift or seek") {
@@ -346,6 +374,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
             beforeEach {
                 // Time has to change otherwise the same ad breaks will be calculated again
                 every { player.currentTime } returns 50.0
+                timeChangedFlow.emit(PlayerEvent.TimeChanged(50.0))
             }
 
             it("resets the state when time shifted") {
@@ -503,6 +532,8 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
         describe("when the player starts in the second ad in the first ad break") {
             it("selects the correct ad index initially") {
+                timeChangedFlow.emit(PlayerEvent.TimeChanged(1.5))
+
                 expectThat(adPlaybackTracker.playingAdBreak.value?.adBreak).isEqualTo(firstAdBreak)
                 expectThat(adPlaybackTracker.playingAdBreak.value?.adIndex).isEqualTo(1)
             }

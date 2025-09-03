@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Race condition that could cause `IndexOutOfBoundsException` when `MediaTailorAdBreak`s got removed during playback
+
 ## [0.1.1] - 2025-07-11
 
 ### Fixed
