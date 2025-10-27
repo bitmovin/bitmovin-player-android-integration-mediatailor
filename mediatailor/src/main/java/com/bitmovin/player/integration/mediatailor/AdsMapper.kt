@@ -11,7 +11,7 @@ internal interface AdsMapper {
 
 internal class DefaultAdsMapper : AdsMapper {
     override fun mapAdBreaks(avails: List<Avail>): List<MediaTailorAdBreak> {
-        return avails.map { avail ->
+        return avails.filter { it.ads.isNotEmpty() }.map { avail ->
             MediaTailorAdBreak(
                 id = avail.availId,
                 ads = avail.ads.map { ad ->
