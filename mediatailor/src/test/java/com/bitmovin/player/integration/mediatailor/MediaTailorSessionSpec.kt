@@ -140,6 +140,38 @@ class MediaTailorSessionSpec : DescribeSpec({
                     expectThat(mediaTailorSession.adBreaks.value).isNotEmpty()
                 }
 
+                describe("when no avails are returned") {
+                    val httpClient = mockk<HttpClient>()
+                    beforeEach {
+                        coEvery { httpClient.post(TEST_SESSION_INIT_URL) } returns HttpRequestResult.Success(
+                            body = successfulSessionInitResponse,
+                        )
+                        coEvery { httpClient.get(FAKE_TRACKING_URL) } returns HttpRequestResult.Success(
+                            body = emptyTrackingResponse,
+                        )
+                        val player = mockk<Player>(relaxed = true)
+                        every { player.eventFlow<SourceEvent.Loaded>() } returns loadedFlow
+                        every { player.isPlaying } returns true
+                        setUp(
+                            player = player,
+                            httpClient = httpClient,
+                        )
+                    }
+
+                    it("adbreak should be empty") {
+                        val result = mediaTailorSession.initialize(
+                            MediaTailorSessionConfig(
+                                sessionInitUrl = TEST_SESSION_INIT_URL,
+                                assetType = MediaTailorAssetType.Vod,
+                            ),
+                        )
+
+                        loadedFlow.emit(SourceEvent.Loaded(source = mockk()))
+
+                        expectThat(mediaTailorSession.adBreaks.value).isEmpty()
+                    }
+                }
+
                 describe("when the asset type is linear") {
                     val httpClient = mockk<HttpClient>()
                     beforeEach {
@@ -319,3 +351,39 @@ private val successfulTrackingResponse = """
   ]
 }
 """.trimIndent()
+
+private val emptyTrackingResponse = """
+    {
+    "avails": [
+        {
+            "adBreakTrackingEvents": [
+                {
+                    "beaconUrls": [
+                        "https://pubads.g.doubleclick.net/pagead/interaction/?ai=BBkdcvoL4aNovsO71_A_T2YrpAqb3vIhHAAAAEAEg_rO1YzgBWOPc4PyDBGClgICAkAG6AQlnZnBfaW1hZ2XIAQWpAg-xrj8UxqU-wAIC4AIA6gIiLzIxNjgxMjAxMzQwL3N0YW4vYXBwL2FuZHJvaWQvdm9kL_gC_NEegAMBkAPkCpgD5AqoAwHgBAHSBQYQhcys3xmQBgGgBiPYBgSoB7i-sQKoB_PRG6gHltgbqAeqm7ECqAeaBqgHl8WxAqgH_56xAqgH35-xAqgH-MKxAqgH-8KxAtgHAeAHAdIIOAiM4YBAEAEYnQEyCIvCge6fgI0IOhSCwICAgICMqAGAgICAgICogAKoA0i9_cE6WM2f3Meft5AD2AgCgAoFmAsBqg0CQVXqDRMIza7fx5-3kAMVMHedCR3TrCIt0BUB-BYBgBcB&sig..."
+                    ],
+                    "eventType": "breakEnd"
+                },
+                {
+                    "beaconUrls": [
+                        "https://pubads.g.doubleclick.net/pagead/interaction/?ai=BBkdcvoL4aNovsO71_A_T2YrpAqb3vIhHAAAAEAEg_rO1YzgBWOPc4PyDBGClgICAkAG6AQlnZnBfaW1hZ2XIAQWpAg-xrj8UxqU-wAIC4AIA6gIiLzIxNjgxMjAxMzQwL3N0YW4vYXBwL2FuZHJvaWQvdm9kL_gC_NEegAMBkAPkCpgD5AqoAwHgBAHSBQYQhcys3xmQBgGgBiPYBgSoB7i-sQKoB_PRG6gHltgbqAeqm7ECqAeaBqgHl8WxAqgH_56xAqgH35-xAqgH-MKxAqgH-8KxAtgHAeAHAdIIOAiM4YBAEAEYnQEyCIvCge6fgI0IOhSCwICAgICMqAGAgICAgICogAKoA0i9_cE6WM2f3Meft5AD2AgCgAoFmAsBqg0CQVXqDRMIza7fx5-3kAMVMHedCR3TrCIt0BUB-BYBgBcB&sig..."
+                    ],
+                    "eventType": "breakStart"
+                }
+            ],
+            "adMarkerDuration": "PT0S",
+            "ads": [],
+            "availId": "0",
+            "availProgramDateTime": null,
+            "duration": "PT0S",
+            "durationInSeconds": 0.0,
+            "meta": null,
+            "nonLinearAdsList": [],
+            "startTime": "PT0S",
+            "startTimeInSeconds": 0.0
+        }
+    ],
+    "dashAvailabilityStartTime": null,
+    "hlsAnchorMediaSequenceNumber": 0,
+    "nextToken": null,
+    "nonLinearAvails": []
+}""".trimIndent()
