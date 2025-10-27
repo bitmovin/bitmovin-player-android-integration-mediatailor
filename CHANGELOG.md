@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- `IndexOutOfBoundsException` when no ads are returned in avails. For Avails without ads, Adbreaks will NOT be created. 
 
 ## [0.1.2] - 2025-09-03
 
