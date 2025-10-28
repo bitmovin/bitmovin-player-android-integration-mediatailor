@@ -11,7 +11,8 @@ internal interface AdsMapper {
 
 internal class DefaultAdsMapper : AdsMapper {
     override fun mapAdBreaks(avails: List<Avail>): List<MediaTailorAdBreak> {
-        return avails.filter { it.ads.isNotEmpty() }.map { avail ->
+        // we still create adbreaks even if empty ads to show countdown for the actual instream ads
+        return avails.map { avail ->
             MediaTailorAdBreak(
                 id = avail.availId,
                 ads = avail.ads.map { ad ->

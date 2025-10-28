@@ -107,6 +107,11 @@ internal class DefaultAdPlaybackTracker(
         }
 
         val ads = adBreak.ads
+        // No need to track if no ads in the adbreak
+        if(ads.isEmpty()) {
+            return
+        }
+
         while (currentAdIndex < ads.lastIndex &&
             player.currentTime >= ads[currentAdIndex].endTime
         ) {
