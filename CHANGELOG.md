@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Fixed
-- `IndexOutOfBoundsException` when no ads are returned in avails. For Avails without ads, Adbreaks will NOT be created. 
+- `IndexOutOfBoundsException` when no ads are returned in avails. For Avails without ads playback tracker will not track ads. 
 
 ## [0.1.2] - 2025-09-03
 
