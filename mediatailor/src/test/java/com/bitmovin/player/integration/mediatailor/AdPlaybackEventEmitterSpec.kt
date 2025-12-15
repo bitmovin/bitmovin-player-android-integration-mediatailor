@@ -75,7 +75,7 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
     describe("when playing ad break changes") {
         describe("and ad break contains ads") {
             beforeEach {
-                val playingAd =  MediaTailorLinearAd(
+                val playingAd = MediaTailorLinearAd(
                     id = "ad1",
                     scheduleTime = 0.0,
                     duration = 10.0,

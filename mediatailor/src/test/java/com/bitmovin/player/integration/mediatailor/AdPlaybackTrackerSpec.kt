@@ -310,14 +310,14 @@ class AdPlaybackTrackerSpec : DescribeSpec({
 
             describe("when the current ad break has no ads") {
                 lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
-                 val adBreak = MediaTailorAdBreak(
-                     id = "adBreak1",
-                     ads = emptyList(),
-                     scheduleTime = 5.0,
-                     duration = 15.0,
-                     formattedDuration = "15",
-                     adMarkerDuration = "15",
-                 )
+                val adBreak = MediaTailorAdBreak(
+                    id = "adBreak1",
+                    ads = emptyList(),
+                    scheduleTime = 5.0,
+                    duration = 15.0,
+                    formattedDuration = "15",
+                    adMarkerDuration = "15",
+                )
 
                 beforeEach {
                     timeChangedFlow = MutableSharedFlow()
