@@ -92,74 +92,73 @@ class AdBeaconingSpec : DescribeSpec({
         }
 
         describe("and an ad is playing") {
+            val playingAd = MediaTailorLinearAd(
+                id = "ad1",
+                scheduleTime = 0.0,
+                duration = 10.0,
+                formattedDuration = "10",
+                trackingEvents = listOf(
+                    MediaTailorTrackingEvent(
+                        id = "start",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "start",
+                        beaconUrls = listOf("http://example.com/start"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "firstQuartile",
+                        scheduleTime = 2.5,
+                        duration = 0.0,
+                        eventType = "firstQuartile",
+                        beaconUrls = listOf("http://example.com/firstQuartile"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "midpoint",
+                        scheduleTime = 5.0,
+                        duration = 0.0,
+                        eventType = "midpoint",
+                        beaconUrls = listOf("http://example.com/midpoint"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "thirdQuartile",
+                        scheduleTime = 7.5,
+                        duration = 0.0,
+                        eventType = "thirdQuartile",
+                        beaconUrls = listOf("http://example.com/thirdQuartile"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "complete",
+                        scheduleTime = 10.0,
+                        duration = 0.0,
+                        eventType = "complete",
+                        beaconUrls = listOf("http://example.com/complete"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "nonLinear",
+                        scheduleTime = 11.0,
+                        duration = 0.0,
+                        eventType = "nonLinear",
+                        beaconUrls = listOf("http://example.com/nonLinear"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "impression",
+                        scheduleTime = -1.0,
+                        duration = 0.0,
+                        eventType = "impression",
+                        beaconUrls = listOf("http://example.com/impression"),
+                    ),
+                ),
+            )
             val playingAdBreak = PlayingAdBreak(
                 adBreak = MediaTailorAdBreak(
                     id = "adBreak1",
-                    ads = listOf(
-                        MediaTailorLinearAd(
-                            id = "ad1",
-                            scheduleTime = 0.0,
-                            duration = 10.0,
-                            formattedDuration = "10",
-                            trackingEvents = listOf(
-                                MediaTailorTrackingEvent(
-                                    id = "start",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "start",
-                                    beaconUrls = listOf("http://example.com/start"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "firstQuartile",
-                                    scheduleTime = 2.5,
-                                    duration = 0.0,
-                                    eventType = "firstQuartile",
-                                    beaconUrls = listOf("http://example.com/firstQuartile"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "midpoint",
-                                    scheduleTime = 5.0,
-                                    duration = 0.0,
-                                    eventType = "midpoint",
-                                    beaconUrls = listOf("http://example.com/midpoint"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "thirdQuartile",
-                                    scheduleTime = 7.5,
-                                    duration = 0.0,
-                                    eventType = "thirdQuartile",
-                                    beaconUrls = listOf("http://example.com/thirdQuartile"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "complete",
-                                    scheduleTime = 10.0,
-                                    duration = 0.0,
-                                    eventType = "complete",
-                                    beaconUrls = listOf("http://example.com/complete"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "nonLinear",
-                                    scheduleTime = 11.0,
-                                    duration = 0.0,
-                                    eventType = "nonLinear",
-                                    beaconUrls = listOf("http://example.com/nonLinear"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "impression",
-                                    scheduleTime = -1.0,
-                                    duration = 0.0,
-                                    eventType = "impression",
-                                    beaconUrls = listOf("http://example.com/impression"),
-                                ),
-                            ),
-                        ),
-                    ),
+                    ads = listOf(playingAd),
                     scheduleTime = 0.0,
                     duration = 10.0,
                     formattedDuration = "10",
                     adMarkerDuration = "10",
                 ),
-                adIndex = 0,
+                ad = playingAd,
             )
             beforeEach {
                 setUp(
@@ -263,42 +262,41 @@ class AdBeaconingSpec : DescribeSpec({
         }
 
         describe("when there is a playing ad") {
+            val playingAd = MediaTailorLinearAd(
+                id = "ad1",
+                scheduleTime = 0.0,
+                duration = 10.0,
+                formattedDuration = "10",
+                trackingEvents = listOf(
+                    MediaTailorTrackingEvent(
+                        id = "pause",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "pause",
+                        beaconUrls = listOf("http://example.com/pause"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "resume",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "resume",
+                        beaconUrls = listOf(
+                            "http://example.com/resume",
+                            "http://example.com/resume2",
+                        ),
+                    ),
+                ),
+            )
             val playingAdBreak = PlayingAdBreak(
                 adBreak = MediaTailorAdBreak(
                     id = "adBreak1",
-                    ads = listOf(
-                        MediaTailorLinearAd(
-                            id = "ad1",
-                            scheduleTime = 0.0,
-                            duration = 10.0,
-                            formattedDuration = "10",
-                            trackingEvents = listOf(
-                                MediaTailorTrackingEvent(
-                                    id = "pause",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "pause",
-                                    beaconUrls = listOf("http://example.com/pause"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "resume",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "resume",
-                                    beaconUrls = listOf(
-                                        "http://example.com/resume",
-                                        "http://example.com/resume2",
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
+                    ads = listOf(playingAd),
                     scheduleTime = 0.0,
                     duration = 10.0,
                     formattedDuration = "10",
                     adMarkerDuration = "10",
                 ),
-                adIndex = 0,
+                ad = playingAd,
             )
             beforeEach {
                 setUp(
@@ -363,67 +361,66 @@ class AdBeaconingSpec : DescribeSpec({
                 every { eventFlow<PlayerEvent.FullscreenExit>() } returns fullscreenExitedFlow
             }
 
+            val playingAd = MediaTailorLinearAd(
+                id = "ad1",
+                scheduleTime = 0.0,
+                duration = 10.0,
+                formattedDuration = "10",
+                trackingEvents = listOf(
+                    MediaTailorTrackingEvent(
+                        id = "mute",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "mute",
+                        beaconUrls = listOf("http://example.com/mute"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "unmute",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "unmute",
+                        beaconUrls = listOf("http://example.com/unmute"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "resume",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "resume",
+                        beaconUrls = listOf("http://example.com/play"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "pause",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "pause",
+                        beaconUrls = listOf("http://example.com/pause"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "fullscreen",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "fullscreen",
+                        beaconUrls = listOf("http://example.com/fullscreenEnter"),
+                    ),
+                    MediaTailorTrackingEvent(
+                        id = "exitFullscreen",
+                        scheduleTime = 0.0,
+                        duration = 0.0,
+                        eventType = "exitFullscreen",
+                        beaconUrls = listOf("http://example.com/fullscreenExit"),
+                    ),
+                ),
+            )
             val playingAdBreak = PlayingAdBreak(
                 adBreak = MediaTailorAdBreak(
                     id = "adBreak1",
-                    ads = listOf(
-                        MediaTailorLinearAd(
-                            id = "ad1",
-                            scheduleTime = 0.0,
-                            duration = 10.0,
-                            formattedDuration = "10",
-                            trackingEvents = listOf(
-                                MediaTailorTrackingEvent(
-                                    id = "mute",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "mute",
-                                    beaconUrls = listOf("http://example.com/mute"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "unmute",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "unmute",
-                                    beaconUrls = listOf("http://example.com/unmute"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "resume",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "resume",
-                                    beaconUrls = listOf("http://example.com/play"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "pause",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "pause",
-                                    beaconUrls = listOf("http://example.com/pause"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "fullscreen",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "fullscreen",
-                                    beaconUrls = listOf("http://example.com/fullscreenEnter"),
-                                ),
-                                MediaTailorTrackingEvent(
-                                    id = "exitFullscreen",
-                                    scheduleTime = 0.0,
-                                    duration = 0.0,
-                                    eventType = "exitFullscreen",
-                                    beaconUrls = listOf("http://example.com/fullscreenExit"),
-                                ),
-                            ),
-                        ),
-                    ),
+                    ads = listOf(playingAd),
                     scheduleTime = 0.0,
                     duration = 10.0,
                     formattedDuration = "10",
                     adMarkerDuration = "10",
                 ),
-                adIndex = 0,
+                ad = playingAd,
             )
 
             beforeEach {

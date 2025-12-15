@@ -18,9 +18,10 @@ import kotlinx.coroutines.launch
 
 internal data class PlayingAdBreak(
     val adBreak: MediaTailorAdBreak,
-    val adIndex: Int,
     val ad: MediaTailorLinearAd?,
-)
+) {
+    val adIndex get() = adBreak.ads.indexOf(ad)
+}
 
 internal interface AdPlaybackTracker : Disposable {
     val nextAdBreak: StateFlow<MediaTailorAdBreak?>
@@ -40,7 +41,6 @@ internal class DefaultAdPlaybackTracker(
         get() = _playingAdBreak
 
     private var currentAdBreakIndex: Int = 0
-    private var currentAdIndex: Int = 0
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -48,7 +48,6 @@ internal class DefaultAdPlaybackTracker(
         scope.launch {
             stateShouldBeInvalidatedFlow().collectLatest {
                 currentAdBreakIndex = 0
-                currentAdIndex = 0
                 val adBreaks = mediaTailorSession.adBreaks.value
 
                 player.eventFlow<PlayerEvent.TimeChanged>().collect {
@@ -81,7 +80,6 @@ internal class DefaultAdPlaybackTracker(
             player.currentTime >= adBreaks[currentAdBreakIndex].endTime
         ) {
             currentAdBreakIndex++
-            currentAdIndex = 0
         }
 
         val adBreak = adBreaks[currentAdBreakIndex]
@@ -105,33 +103,13 @@ internal class DefaultAdPlaybackTracker(
         }
 
         val ads = adBreak.ads
-        if (ads.isEmpty()) {
-            currentAdIndex = 0
-            _playingAdBreak.update {
-                PlayingAdBreak(
-                    adBreak = adBreak,
-                    adIndex = currentAdIndex,
-                    ad = null,
-                )
-            }
-            return
-        }
-
-        while (currentAdIndex < ads.lastIndex &&
-            player.currentTime >= ads[currentAdIndex].endTime
-        ) {
-            currentAdIndex++
-        }
-
-        val ad = ads[currentAdIndex]
-        if (player.currentTime in ad.startToEndTime) {
-            _playingAdBreak.update {
-                PlayingAdBreak(
-                    adBreak = adBreak,
-                    adIndex = currentAdIndex,
-                    ad = ad,
-                )
-            }
+        // It is possible that ad break has no ads
+        val playingAdOrNull = ads.lastOrNull { player.currentTime in it.startToEndTime }
+        _playingAdBreak.update {
+            PlayingAdBreak(
+                adBreak = adBreak,
+                ad = playingAdOrNull,
+            )
         }
     }
 

@@ -73,25 +73,24 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
 
     describe("when playing ad break changes") {
         beforeEach {
+             val playingAd =  MediaTailorLinearAd(
+                id = "ad1",
+                scheduleTime = 0.0,
+                duration = 10.0,
+                formattedDuration = "10",
+                trackingEvents = emptyList(),
+            )
             playingAdBreak.emit(
                 PlayingAdBreak(
                     adBreak = MediaTailorAdBreak(
                         id = "adBreak1",
-                        ads = listOf(
-                            MediaTailorLinearAd(
-                                id = "ad1",
-                                scheduleTime = 0.0,
-                                duration = 10.0,
-                                formattedDuration = "10",
-                                trackingEvents = emptyList(),
-                            ),
-                        ),
+                        ads = listOf(playingAd),
                         scheduleTime = 0.0,
                         duration = 10.0,
                         formattedDuration = "10",
                         adMarkerDuration = "10",
                     ),
-                    adIndex = 0,
+                    ad = playingAd,
                 ),
             )
         }
@@ -157,25 +156,24 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
 
         describe("when the ad break changes") {
             beforeEach {
+                val playingAd = MediaTailorLinearAd(
+                    id = "ad2",
+                    scheduleTime = 0.0,
+                    duration = 10.0,
+                    formattedDuration = "10",
+                    trackingEvents = emptyList(),
+                )
                 playingAdBreak.emit(
                     PlayingAdBreak(
                         adBreak = MediaTailorAdBreak(
                             id = "adBreak2",
-                            ads = listOf(
-                                MediaTailorLinearAd(
-                                    id = "ad2",
-                                    scheduleTime = 0.0,
-                                    duration = 10.0,
-                                    formattedDuration = "10",
-                                    trackingEvents = emptyList(),
-                                ),
-                            ),
+                            ads = listOf(playingAd),
                             scheduleTime = 0.0,
                             duration = 10.0,
                             formattedDuration = "10",
                             adMarkerDuration = "10",
                         ),
-                        adIndex = 0,
+                        ad = playingAd,
                     ),
                 )
             }
@@ -220,25 +218,24 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
 
         describe("when the current ad changes") {
             beforeEach {
+                val playingAd = MediaTailorLinearAd(
+                    id = "ad2",
+                    scheduleTime = 0.0,
+                    duration = 10.0,
+                    formattedDuration = "10",
+                    trackingEvents = emptyList(),
+                )
                 playingAdBreak.emit(
                     PlayingAdBreak(
                         adBreak = MediaTailorAdBreak(
                             id = "adBreak1",
-                            ads = listOf(
-                                MediaTailorLinearAd(
-                                    id = "ad2",
-                                    scheduleTime = 0.0,
-                                    duration = 10.0,
-                                    formattedDuration = "10",
-                                    trackingEvents = emptyList(),
-                                ),
-                            ),
+                            ads = listOf(playingAd),
                             scheduleTime = 0.0,
                             duration = 10.0,
                             formattedDuration = "10",
                             adMarkerDuration = "10",
                         ),
-                        adIndex = 0,
+                        ad = playingAd,
                     ),
                 )
             }
