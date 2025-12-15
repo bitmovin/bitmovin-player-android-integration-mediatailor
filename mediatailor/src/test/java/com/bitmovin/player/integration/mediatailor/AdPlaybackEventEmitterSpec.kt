@@ -17,6 +17,7 @@ import strikt.assertions.containsSequence
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEmpty
+import strikt.assertions.none
 import strikt.assertions.single
 import util.TestAdPlaybackTracker
 import util.TestEventEmitter
@@ -72,154 +73,10 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
     }
 
     describe("when playing ad break changes") {
-        beforeEach {
-             val playingAd =  MediaTailorLinearAd(
-                id = "ad1",
-                scheduleTime = 0.0,
-                duration = 10.0,
-                formattedDuration = "10",
-                trackingEvents = emptyList(),
-            )
-            playingAdBreak.emit(
-                PlayingAdBreak(
-                    adBreak = MediaTailorAdBreak(
-                        id = "adBreak1",
-                        ads = listOf(playingAd),
-                        scheduleTime = 0.0,
-                        duration = 10.0,
-                        formattedDuration = "10",
-                        adMarkerDuration = "10",
-                    ),
-                    ad = playingAd,
-                ),
-            )
-        }
-
-        describe("when ad break starts") {
-            it("emits ad started event") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdStarted>()
-                        .and {
-                            get { ad.id }.isEqualTo("ad1")
-                            get { indexInQueue }.isEqualTo(0)
-                        }
-                }
-            }
-
-            it("emits ad break started event") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdBreakStarted>()
-                        .and {
-                            get { adBreak.id }.isEqualTo("adBreak1")
-                        }
-                }
-            }
-
-            it("ad break started event is emitted before ad started event") {
-                expectThat(testEventEmitter.emittedEvents.map { it::class })
-                    .containsSequence(
-                        MediaTailorEvent.AdBreakStarted::class,
-                        MediaTailorEvent.AdStarted::class,
-                    )
-            }
-        }
-
-        describe("when ad break finishes") {
+        describe("and ad break contains ads") {
             beforeEach {
-                playingAdBreak.emit(null)
-            }
-
-            it("emits ad finished event") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdFinished>().and {
-                        get { ad.id }.isEqualTo("ad1")
-                    }
-                }
-            }
-
-            it("emits ad break finished event") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdBreakFinished>().and {
-                        get { adBreak.id }.isEqualTo("adBreak1")
-                    }
-                }
-            }
-
-            it("ad finished event is emitted before ad break finished event") {
-                expectThat(testEventEmitter.emittedEvents.map { it::class })
-                    .containsSequence(
-                        MediaTailorEvent.AdFinished::class,
-                        MediaTailorEvent.AdBreakFinished::class,
-                    )
-            }
-        }
-
-        describe("when the ad break changes") {
-            beforeEach {
-                val playingAd = MediaTailorLinearAd(
-                    id = "ad2",
-                    scheduleTime = 0.0,
-                    duration = 10.0,
-                    formattedDuration = "10",
-                    trackingEvents = emptyList(),
-                )
-                playingAdBreak.emit(
-                    PlayingAdBreak(
-                        adBreak = MediaTailorAdBreak(
-                            id = "adBreak2",
-                            ads = listOf(playingAd),
-                            scheduleTime = 0.0,
-                            duration = 10.0,
-                            formattedDuration = "10",
-                            adMarkerDuration = "10",
-                        ),
-                        ad = playingAd,
-                    ),
-                )
-            }
-
-            it("emits ad break finished event for the previous ad break") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdBreakFinished>()
-                        .and {
-                            get { adBreak.id }.isEqualTo("adBreak1")
-                        }
-                }
-            }
-
-            it("emits ad finished event for the previous ad") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdFinished>()
-                        .and {
-                            get { ad.id }.isEqualTo("ad1")
-                        }
-                }
-            }
-
-            it("emits ad break started event for the new ad break") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdBreakStarted>()
-                        .and {
-                            get { adBreak.id }.isEqualTo("adBreak2")
-                        }
-                }
-            }
-
-            it("emits ad started event for the new ad") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdStarted>()
-                        .and {
-                            get { ad.id }.isEqualTo("ad2")
-                            get { indexInQueue }.isEqualTo(0)
-                        }
-                }
-            }
-        }
-
-        describe("when the current ad changes") {
-            beforeEach {
-                val playingAd = MediaTailorLinearAd(
-                    id = "ad2",
+                val playingAd =  MediaTailorLinearAd(
+                    id = "ad1",
                     scheduleTime = 0.0,
                     duration = 10.0,
                     formattedDuration = "10",
@@ -240,31 +97,291 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
                 )
             }
 
-            it("emits ad finished event") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdFinished>()
-                        .and {
+            describe("when ad break starts") {
+                it("emits ad started event") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdStarted>()
+                            .and {
+                                get { ad.id }.isEqualTo("ad1")
+                                get { indexInQueue }.isEqualTo(0)
+                            }
+                    }
+                }
+
+                it("emits ad break started event") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdBreakStarted>()
+                            .and {
+                                get { adBreak.id }.isEqualTo("adBreak1")
+                            }
+                    }
+                }
+
+                it("ad break started event is emitted before ad started event") {
+                    expectThat(testEventEmitter.emittedEvents.map { it::class })
+                        .containsSequence(
+                            MediaTailorEvent.AdBreakStarted::class,
+                            MediaTailorEvent.AdStarted::class,
+                        )
+                }
+            }
+
+            describe("when ad break finishes") {
+                beforeEach {
+                    playingAdBreak.emit(null)
+                }
+
+                it("emits ad finished event") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdFinished>().and {
                             get { ad.id }.isEqualTo("ad1")
                         }
+                    }
                 }
-            }
 
-            it("emits ad started event") {
-                expectThat(testEventEmitter.emittedEvents).any {
-                    isA<MediaTailorEvent.AdStarted>()
-                        .and {
-                            get { ad.id }.isEqualTo("ad2")
-                            get { indexInQueue }.isEqualTo(0)
+                it("emits ad break finished event") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdBreakFinished>().and {
+                            get { adBreak.id }.isEqualTo("adBreak1")
                         }
+                    }
+                }
+
+                it("ad finished event is emitted before ad break finished event") {
+                    expectThat(testEventEmitter.emittedEvents.map { it::class })
+                        .containsSequence(
+                            MediaTailorEvent.AdFinished::class,
+                            MediaTailorEvent.AdBreakFinished::class,
+                        )
                 }
             }
 
-            it("ad finished event is emitted before ad started event") {
-                expectThat(testEventEmitter.emittedEvents.map { it::class })
-                    .containsSequence(
-                        MediaTailorEvent.AdFinished::class,
-                        MediaTailorEvent.AdStarted::class,
+            describe("when the ad break changes") {
+                beforeEach {
+                    val playingAd = MediaTailorLinearAd(
+                        id = "ad2",
+                        scheduleTime = 0.0,
+                        duration = 10.0,
+                        formattedDuration = "10",
+                        trackingEvents = emptyList(),
                     )
+                    playingAdBreak.emit(
+                        PlayingAdBreak(
+                            adBreak = MediaTailorAdBreak(
+                                id = "adBreak2",
+                                ads = listOf(playingAd),
+                                scheduleTime = 0.0,
+                                duration = 10.0,
+                                formattedDuration = "10",
+                                adMarkerDuration = "10",
+                            ),
+                            ad = playingAd,
+                        ),
+                    )
+                }
+
+                it("emits ad break finished event for the previous ad break") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdBreakFinished>()
+                            .and {
+                                get { adBreak.id }.isEqualTo("adBreak1")
+                            }
+                    }
+                }
+
+                it("emits ad finished event for the previous ad") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdFinished>()
+                            .and {
+                                get { ad.id }.isEqualTo("ad1")
+                            }
+                    }
+                }
+
+                it("emits ad break started event for the new ad break") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdBreakStarted>()
+                            .and {
+                                get { adBreak.id }.isEqualTo("adBreak2")
+                            }
+                    }
+                }
+
+                it("emits ad started event for the new ad") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdStarted>()
+                            .and {
+                                get { ad.id }.isEqualTo("ad2")
+                                get { indexInQueue }.isEqualTo(0)
+                            }
+                    }
+                }
+            }
+
+            describe("when the current ad changes") {
+                beforeEach {
+                    val playingAd = MediaTailorLinearAd(
+                        id = "ad2",
+                        scheduleTime = 0.0,
+                        duration = 10.0,
+                        formattedDuration = "10",
+                        trackingEvents = emptyList(),
+                    )
+                    playingAdBreak.emit(
+                        PlayingAdBreak(
+                            adBreak = MediaTailorAdBreak(
+                                id = "adBreak1",
+                                ads = listOf(playingAd),
+                                scheduleTime = 0.0,
+                                duration = 10.0,
+                                formattedDuration = "10",
+                                adMarkerDuration = "10",
+                            ),
+                            ad = playingAd,
+                        ),
+                    )
+                }
+
+                it("emits ad finished event") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdFinished>()
+                            .and {
+                                get { ad.id }.isEqualTo("ad1")
+                            }
+                    }
+                }
+
+                it("emits ad started event") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdStarted>()
+                            .and {
+                                get { ad.id }.isEqualTo("ad2")
+                                get { indexInQueue }.isEqualTo(0)
+                            }
+                    }
+                }
+
+                it("ad finished event is emitted before ad started event") {
+                    expectThat(testEventEmitter.emittedEvents.map { it::class })
+                        .containsSequence(
+                            MediaTailorEvent.AdFinished::class,
+                            MediaTailorEvent.AdStarted::class,
+                        )
+                }
+            }
+        }
+
+        describe("and ad break contains no ads") {
+            beforeEach {
+                playingAdBreak.emit(
+                    PlayingAdBreak(
+                        adBreak = MediaTailorAdBreak(
+                            id = "adBreak1",
+                            ads = emptyList(),
+                            scheduleTime = 0.0,
+                            duration = 10.0,
+                            formattedDuration = "10",
+                            adMarkerDuration = "10",
+                        ),
+                        ad = null,
+                    ),
+                )
+            }
+
+            describe("when ad break starts") {
+                it("does not emit ad started event") {
+                    expectThat(testEventEmitter.emittedEvents).none {
+                        isA<MediaTailorEvent.AdStarted>()
+                    }
+                }
+
+                it("emits ad break started event") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdBreakStarted>()
+                            .and {
+                                get { adBreak.id }.isEqualTo("adBreak1")
+                            }
+                    }
+                }
+            }
+
+            describe("when ad break finishes") {
+                beforeEach {
+                    playingAdBreak.emit(null)
+                }
+
+                it("does not emit ad finished event") {
+                    expectThat(testEventEmitter.emittedEvents).none {
+                        isA<MediaTailorEvent.AdFinished>()
+                    }
+                }
+
+                it("emits ad break finished event") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdBreakFinished>().and {
+                            get { adBreak.id }.isEqualTo("adBreak1")
+                        }
+                    }
+                }
+            }
+
+            describe("when the ad break changes with active ad") {
+                beforeEach {
+                    val playingAd = MediaTailorLinearAd(
+                        id = "ad2",
+                        scheduleTime = 0.0,
+                        duration = 10.0,
+                        formattedDuration = "10",
+                        trackingEvents = emptyList(),
+                    )
+                    playingAdBreak.emit(
+                        PlayingAdBreak(
+                            adBreak = MediaTailorAdBreak(
+                                id = "adBreak2",
+                                ads = listOf(playingAd),
+                                scheduleTime = 0.0,
+                                duration = 10.0,
+                                formattedDuration = "10",
+                                adMarkerDuration = "10",
+                            ),
+                            ad = playingAd,
+                        ),
+                    )
+                }
+
+                it("emits ad break finished event for the previous ad break") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdBreakFinished>()
+                            .and {
+                                get { adBreak.id }.isEqualTo("adBreak1")
+                            }
+                    }
+                }
+
+                it("does not emit ad finished event for the previous ad break") {
+                    expectThat(testEventEmitter.emittedEvents).none {
+                        isA<MediaTailorEvent.AdFinished>()
+                    }
+                }
+
+                it("emits ad break started event for the new ad break") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdBreakStarted>()
+                            .and {
+                                get { adBreak.id }.isEqualTo("adBreak2")
+                            }
+                    }
+                }
+
+                it("emits ad started event for the new ad") {
+                    expectThat(testEventEmitter.emittedEvents).any {
+                        isA<MediaTailorEvent.AdStarted>()
+                            .and {
+                                get { ad.id }.isEqualTo("ad2")
+                                get { indexInQueue }.isEqualTo(0)
+                            }
+                    }
+                }
             }
         }
     }
