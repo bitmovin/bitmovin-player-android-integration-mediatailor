@@ -19,10 +19,8 @@ import kotlinx.coroutines.launch
 internal data class PlayingAdBreak(
     val adBreak: MediaTailorAdBreak,
     val adIndex: Int,
-) {
-    val ad: MediaTailorLinearAd
-        get() = adBreak.ads[adIndex]
-}
+    val ad: MediaTailorLinearAd?,
+)
 
 internal interface AdPlaybackTracker : Disposable {
     val nextAdBreak: StateFlow<MediaTailorAdBreak?>
@@ -107,8 +105,15 @@ internal class DefaultAdPlaybackTracker(
         }
 
         val ads = adBreak.ads
-        // No need to track if no ads in the adbreak
-        if(ads.isEmpty()) {
+        if (ads.isEmpty()) {
+            currentAdIndex = 0
+            _playingAdBreak.update {
+                PlayingAdBreak(
+                    adBreak = adBreak,
+                    adIndex = currentAdIndex,
+                    ad = null,
+                )
+            }
             return
         }
 
@@ -124,6 +129,7 @@ internal class DefaultAdPlaybackTracker(
                 PlayingAdBreak(
                     adBreak = adBreak,
                     adIndex = currentAdIndex,
+                    ad = ad,
                 )
             }
         }

@@ -54,7 +54,7 @@ internal class DefaultAdBeaconing(
                 return@collect
             }
             val adBreak = playingAdBreak.adBreak
-            val ad = playingAdBreak.ad
+            val ad = playingAdBreak.ad ?: return@collect
 
             ad.trackingEvents
                 .filter { timeChangedEvent.time in it.paddedStartTime }
