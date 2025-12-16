@@ -66,7 +66,7 @@ internal class DefaultAdPlaybackTracker(
     )
 
     /**
-     * This function uses [currentAdBreakIndex] and [currentAdIndex] to track the current position
+     * This function uses [currentAdBreakIndex] to track the current position
      * of the [playingAdBreak] and [nextAdBreak] to avoid unnecessary iterations over all ad breaks.
      *
      * It assumes that ad breaks are sorted by schedule time.
@@ -102,9 +102,8 @@ internal class DefaultAdPlaybackTracker(
             return
         }
 
-        val ads = adBreak.ads
-        // It is possible that ad break has no ads
-        val playingAdOrNull = ads.lastOrNull { player.currentTime in it.startToEndTime }
+        // It is possible that ad break has no ads.
+        val playingAdOrNull = adBreak.ads.lastOrNull { player.currentTime in it.startToEndTime }
         _playingAdBreak.update {
             PlayingAdBreak(
                 adBreak = adBreak,
