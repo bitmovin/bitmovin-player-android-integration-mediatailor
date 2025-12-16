@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Fixed
-- `IndexOutOfBoundsException` when MediaTailorAdBreak (Avail) contains no ads. When player reaches such ad break `AdBreakStarted` and `AdBreakFinished` ere emitted, but no `AdStarted` or `AdFinished` are emitted
+- `IndexOutOfBoundsException` when MediaTailorAdBreak (Avail) contains no ads. When player reaches such ad break `AdBreakStarted` and `AdBreakFinished` are emitted, but no `AdStarted` or `AdFinished` are emitted
 
 ## [0.1.2] - 2025-09-03
 
