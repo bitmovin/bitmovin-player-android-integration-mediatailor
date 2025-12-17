@@ -307,6 +307,37 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                     expectThat(adPlaybackTracker.playingAdBreak.value?.adIndex).isEqualTo(2)
                 }
             }
+
+            describe("when the current ad break has no ads") {
+                lateinit var timeChangedFlow: MutableSharedFlow<PlayerEvent.TimeChanged>
+                val adBreak = MediaTailorAdBreak(
+                    id = "adBreak1",
+                    ads = emptyList(),
+                    scheduleTime = 5.0,
+                    duration = 15.0,
+                    formattedDuration = "15",
+                    adMarkerDuration = "15",
+                )
+
+                beforeEach {
+                    timeChangedFlow = MutableSharedFlow()
+                    createPlayer(currentTime = 10.0, timeChangedFlow)
+                    createAdPlaybackTracker(listOf(adBreak))
+                    timeChangedFlow.emit(PlayerEvent.TimeChanged(10.0))
+                }
+
+                it("returns the correct ad break") {
+                    expectThat(adPlaybackTracker.playingAdBreak.value?.adBreak).isEqualTo(adBreak)
+                }
+
+                it("current ad is null") {
+                    expectThat(adPlaybackTracker.playingAdBreak.value?.ad).isEqualTo(null)
+                }
+
+                it("returns unknown index") {
+                    expectThat(adPlaybackTracker.playingAdBreak.value?.adIndex).isEqualTo(-1)
+                }
+            }
         }
     }
 

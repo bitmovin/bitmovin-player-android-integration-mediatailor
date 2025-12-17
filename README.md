@@ -36,6 +36,7 @@ Check out [TrackingEvent](https://github.com/bitmovin/bitmovin-player-android-in
 ## Limitations
 - No support for companion ads
 - No support for the Bitmovin player playlist feature
+- No support for MediaTailorAdBreak (Avail) adBreakTrackingEvents, currently only MediaTailorAd (Ad) trackingEvents are used for tracking
 
 # Getting started
 Follow the [getting started guide](https://developer.bitmovin.com/playback/docs/getting-started-android) to integrate Bitmovin player into your project.
