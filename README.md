@@ -54,7 +54,7 @@ dependencyResolutionManagement {
 Include the MediaTailor integration in your `build.gradle.kts` file:
 ```kotlin
 dependencies {
-    implementation("com.bitmovin.player.integration:mediatailor:0.1.2")
+    implementation("com.bitmovin.player.integration:mediatailor:0.1.3")
 }
 ```
 ## Examples
