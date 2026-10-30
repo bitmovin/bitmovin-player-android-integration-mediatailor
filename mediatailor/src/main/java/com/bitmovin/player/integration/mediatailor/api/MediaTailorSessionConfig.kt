@@ -64,4 +64,15 @@ public class LinearAssetTypeConfig(
      * Reference: https://docs.aws.amazon.com/mediatailor/latest/ug/ad-reporting-client-side.html#ad-reporting-client-side-best-practices
      */
     public val trackingRequestPollFrequency: Duration = 4.seconds,
+    /**
+     * Whether the TrackingUrl is paged with the `aws.nextToken` query parameter.
+     * - When set to `true`, the `nextToken` of each tracking response is sent with the next request, so MediaTailor
+     *   only returns the beacons that are new since the previous response. The partial responses are merged into the
+     *   already known ad breaks. If a request that carries a token fails, the next request is sent without a token and
+     *   replaces the known ad breaks.
+     * - When set to `false`, every request returns (and replaces) all ad breaks.
+     *
+     * Reference: https://docs.aws.amazon.com/mediatailor/latest/ug/ad-reporting-client-side.html#ad-reporting-client-side-paging
+     */
+    public val trackingRequestPaginationEnabled: Boolean = false,
 )

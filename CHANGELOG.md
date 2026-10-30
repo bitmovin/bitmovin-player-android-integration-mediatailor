@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `LinearAssetTypeConfig.trackingRequestPaginationEnabled` to page the tracking requests of linear assets with MediaTailor's `aws.nextToken`. Paged responses are merged into the known ad breaks. Disabled by default
+
 ## [0.1.3] - 2025-12-17
 
 ### Fixed
