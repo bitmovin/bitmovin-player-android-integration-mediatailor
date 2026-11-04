@@ -5,10 +5,12 @@ import com.bitmovin.player.integration.mediatailor.model.Ad
 import com.bitmovin.player.integration.mediatailor.model.Avail
 import com.bitmovin.player.integration.mediatailor.model.TrackingEvent
 import io.kotest.core.spec.style.DescribeSpec
+import kotlinx.serialization.json.Json
 import strikt.api.expectThat
 import strikt.assertions.first
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 
 class AdsMapperSpec : DescribeSpec({
     val adsMapper = DefaultAdsMapper()
@@ -134,5 +136,45 @@ class AdsMapperSpec : DescribeSpec({
                     get { beaconUrls }.hasSize(1).first() isEqualTo "http://example.com/beacon1"
                 }
             }
+    }
+
+    describe("adVerifications") {
+        fun mapAd(adVerificationsEntry: String): String? {
+            val adJson = """
+                {
+                    "adId": "ad1",
+                    "duration": "PT20S",
+                    "durationInSeconds": 20.0,
+                    "startTime": "PT10S",
+                    "startTimeInSeconds": 10.0,
+                    "trackingEvents": []$adVerificationsEntry
+                }
+            """.trimIndent()
+            val ad = Json { ignoreUnknownKeys = true }.decodeFromString<Ad>(adJson)
+            val avail = Avail(
+                availId = "avail1",
+                startTimeInSeconds = 10.0,
+                durationInSeconds = 20.0,
+                ads = listOf(ad),
+                duration = "PT20S",
+                startTime = "PT10S",
+                adMarkerDuration = "PT20S",
+            )
+            return adsMapper.mapAdBreaks(listOf(avail)).first().ads.first().adVerificationsJson
+        }
+
+        it("maps adVerifications to compact JSON") {
+            val json = mapAd(""", "adVerifications": [ { "vendor": "v", "verificationParameters": "p" } ]""")
+
+            expectThat(json) isEqualTo """[{"vendor":"v","verificationParameters":"p"}]"""
+        }
+
+        it("maps missing adVerifications to null") {
+            expectThat(mapAd("")).isNull()
+        }
+
+        it("maps empty adVerifications to empty JSON array") {
+            expectThat(mapAd(""", "adVerifications": []""")) isEqualTo "[]"
+        }
     }
 })

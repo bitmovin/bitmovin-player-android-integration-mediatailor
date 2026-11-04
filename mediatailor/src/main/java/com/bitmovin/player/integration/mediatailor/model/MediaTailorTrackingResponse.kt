@@ -1,6 +1,7 @@
 package com.bitmovin.player.integration.mediatailor.model
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 internal data class MediaTailorTrackingResponse(
@@ -27,6 +28,7 @@ internal data class Ad(
     val startTime: String,
     val startTimeInSeconds: Double,
     val trackingEvents: List<TrackingEvent>,
+    val adVerifications: JsonElement? = null,
 )
 
 @Serializable
