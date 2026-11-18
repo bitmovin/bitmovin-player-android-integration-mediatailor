@@ -4,7 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class MediaTailorTrackingResponse(
-    val avails: List<Avail>,
+    val avails: List<Avail> = emptyList(),
+    val nextToken: String? = null,
 )
 
 @Serializable

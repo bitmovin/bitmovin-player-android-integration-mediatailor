@@ -6,6 +6,7 @@ import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAssetType
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorSessionConfig
 import com.bitmovin.player.integration.mediatailor.api.SessionInitializationResult
+import com.bitmovin.player.integration.mediatailor.model.Avail
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorSessionInitializationResponse
 import com.bitmovin.player.integration.mediatailor.model.MediaTailorTrackingResponse
 import com.bitmovin.player.integration.mediatailor.network.HttpClient
@@ -14,6 +15,7 @@ import com.bitmovin.player.integration.mediatailor.util.Disposable
 import com.bitmovin.player.integration.mediatailor.util.eventFlow
 import com.bitmovin.player.integration.mediatailor.util.runCatchingCooperative
 import java.net.URI
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +51,8 @@ internal class DefaultMediaTailorSession(
     private var trackingUrl: String? = null
     private var sessionConfig: MediaTailorSessionConfig? = null
     private var refreshTrackingResponseJob: Job? = null
+    private var nextToken: String? = null
+    private var pagedAvails: List<Avail> = emptyList()
 
     init {
         mainScope.launch {
@@ -70,6 +74,7 @@ internal class DefaultMediaTailorSession(
             player.eventFlow<SourceEvent.Unloaded>().collect {
                 refreshTrackingResponseJob?.cancel()
                 refreshTrackingResponseJob = null
+                clearPaginationState()
             }
         }
     }
@@ -115,8 +120,45 @@ internal class DefaultMediaTailorSession(
 
     private suspend fun requestTrackingData() {
         val trackingUrl = trackingUrl ?: return
+        val assetType = sessionConfig?.assetType
+        if (assetType is MediaTailorAssetType.Linear && assetType.config.trackingRequestPaginationEnabled) {
+            requestPagedTrackingData(trackingUrl)
+            return
+        }
         val response = requestTrackingData(trackingUrl)
         _adBreaks.update { adsMapper.mapAdBreaks(response.avails) }
+    }
+
+    /**
+     * Requests the tracking data with the `aws.nextToken` of the previous response, if there is one.
+     *
+     * - Without a token, the response contains all avails and replaces the known avails.
+     * - With a token, the response only contains what is new and is merged into the known avails.
+     * - If a request with a token fails, the token is dropped so that the next request is a full one. The known avails
+     *   are kept.
+     */
+    private suspend fun requestPagedTrackingData(trackingUrl: String) {
+        // Captured before sending, the state must not be read again to decide how to handle the response.
+        val requestToken = nextToken
+        val url = if (requestToken == null) trackingUrl else trackingUrl.withNextToken(requestToken)
+        val response = try {
+            requestTrackingData(url)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            if (requestToken != null) {
+                nextToken = null
+            }
+            throw e
+        }
+        pagedAvails = if (requestToken == null) response.avails else mergeAvails(pagedAvails, response.avails)
+        nextToken = response.nextToken
+        _adBreaks.update { adsMapper.mapAdBreaks(pagedAvails) }
+    }
+
+    private fun clearPaginationState() {
+        nextToken = null
+        pagedAvails = emptyList()
     }
 
     /**
@@ -155,6 +197,7 @@ internal class DefaultMediaTailorSession(
     override fun dispose() {
         trackingUrl = null
         sessionConfig = null
+        clearPaginationState()
         mainScope.cancel()
     }
 }

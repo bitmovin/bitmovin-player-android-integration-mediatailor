@@ -40,8 +40,9 @@ public final class com/bitmovin/player/integration/mediatailor/api/LinearAdTrack
 }
 
 public final class com/bitmovin/player/integration/mediatailor/api/LinearAssetTypeConfig {
-	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getTrackingRequestPaginationEnabled ()Z
 	public final fun getTrackingRequestPollFrequency-UwyO8pc ()J
 }
 
