@@ -65,6 +65,13 @@ public data class MediaTailorLinearAd(
      */
     public val formattedDuration: String,
     public val trackingEvents: List<MediaTailorTrackingEvent>,
+    /**
+     * Raw JSON array of MediaTailor `adVerifications` for this ad, as returned by MediaTailor.
+     * `null` if the response contains none.
+     *
+     * Intended for Open Measurement SDK integration; the plugin does not interpret it.
+     */
+    public val adVerificationsJson: String? = null,
 ) {
     /**
      * Ad click through url, if present.

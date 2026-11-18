@@ -29,6 +29,7 @@ internal class DefaultAdsMapper : AdsMapper {
                                 beaconUrls = trackingEvent.beaconUrls,
                             )
                         },
+                        adVerificationsJson = ad.adVerifications?.toString(),
                     )
                 },
                 scheduleTime = avail.startTimeInSeconds,

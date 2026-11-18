@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `MediaTailorLinearAd.adVerificationsJson` exposing the raw `adVerifications` of a linear ad as a JSON string.
+
 ## [0.1.3] - 2025-12-17
 
 ### Fixed
