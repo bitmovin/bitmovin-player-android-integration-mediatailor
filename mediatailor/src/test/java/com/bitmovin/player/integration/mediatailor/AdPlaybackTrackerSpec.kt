@@ -102,6 +102,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                             duration = 5.0,
                             formattedDuration = "5",
                             trackingEvents = listOf(),
+                            companionAds = emptyList(),
                         ),
                     ),
                     scheduleTime = 4.0,
@@ -184,6 +185,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                             duration = 3.0,
                             formattedDuration = "3",
                             trackingEvents = listOf(),
+                            companionAds = emptyList(),
                         ),
                     ),
                     scheduleTime = 4.0,
@@ -200,6 +202,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                             duration = 5.0,
                             formattedDuration = "5",
                             trackingEvents = listOf(),
+                            companionAds = emptyList(),
                         ),
                     ),
                     scheduleTime = 10.0,
@@ -227,6 +230,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                 duration = 5.0,
                 formattedDuration = "5",
                 trackingEvents = listOf(),
+                companionAds = emptyList(),
             )
             val secondAd = MediaTailorLinearAd(
                 id = "ad2",
@@ -234,6 +238,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                 duration = 5.0,
                 formattedDuration = "5",
                 trackingEvents = listOf(),
+                companionAds = emptyList(),
             )
             val thirdAd = MediaTailorLinearAd(
                 id = "ad3",
@@ -241,6 +246,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                 duration = 5.0,
                 formattedDuration = "5",
                 trackingEvents = listOf(),
+                companionAds = emptyList(),
             )
             val adBreak = MediaTailorAdBreak(
                 id = "adBreak1",
@@ -364,6 +370,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         duration = 3.0,
                         formattedDuration = "3",
                         trackingEvents = listOf(),
+                        companionAds = emptyList(),
                     ),
                 ),
                 scheduleTime = 4.0,
@@ -380,6 +387,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         duration = 5.0,
                         formattedDuration = "5",
                         trackingEvents = listOf(),
+                        companionAds = emptyList(),
                     ),
                 ),
                 scheduleTime = 10.0,
@@ -443,6 +451,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         duration = 3.0,
                         formattedDuration = "3",
                         trackingEvents = listOf(),
+                        companionAds = emptyList(),
                     ),
                 ),
                 scheduleTime = 4.0,
@@ -459,6 +468,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         duration = 5.0,
                         formattedDuration = "5",
                         trackingEvents = listOf(),
+                        companionAds = emptyList(),
                     ),
                 ),
                 scheduleTime = 10.0,
@@ -528,6 +538,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         duration = 1.0,
                         formattedDuration = "1",
                         trackingEvents = listOf(),
+                        companionAds = emptyList(),
                     ),
                     MediaTailorLinearAd(
                         id = "ad2",
@@ -535,6 +546,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         duration = 1.0,
                         formattedDuration = "1",
                         trackingEvents = listOf(),
+                        companionAds = emptyList(),
                     ),
                 ),
                 scheduleTime = 0.0,
@@ -551,6 +563,7 @@ class AdPlaybackTrackerSpec : DescribeSpec({
                         duration = 1.0,
                         formattedDuration = "1",
                         trackingEvents = listOf(),
+                        companionAds = emptyList(),
                     ),
                 ),
                 scheduleTime = 3.0,

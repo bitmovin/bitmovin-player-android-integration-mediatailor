@@ -239,6 +239,7 @@ private val successfulTrackingResponse = """
           "durationInSeconds": 15.1,
           "startTime": "PT17.817798612S",
           "startTimeInSeconds": 17.817,
+          "companionAds": [],
           "trackingEvents": [
           {
               "beaconUrls": [
@@ -314,7 +315,7 @@ private val successfulTrackingResponse = """
       "durationInSeconds": 15.1,
       "adMarkerDuration": "PT15.100000078S",
       "startTime": "PT17.817798612S",
-      "startTimeInSeconds": 17.817
+      "startTimeInSeconds": 17.817,
     }
   ]
 }

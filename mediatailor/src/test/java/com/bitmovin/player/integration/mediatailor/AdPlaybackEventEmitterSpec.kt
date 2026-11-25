@@ -81,6 +81,7 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
                     duration = 10.0,
                     formattedDuration = "10",
                     trackingEvents = emptyList(),
+                    companionAds = emptyList(),
                 )
                 playingAdBreak.emit(
                     PlayingAdBreak(
@@ -164,6 +165,7 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
                         duration = 10.0,
                         formattedDuration = "10",
                         trackingEvents = emptyList(),
+                        companionAds = emptyList(),
                     )
                     playingAdBreak.emit(
                         PlayingAdBreak(
@@ -226,6 +228,7 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
                         duration = 10.0,
                         formattedDuration = "10",
                         trackingEvents = emptyList(),
+                        companionAds = emptyList(),
                     )
                     playingAdBreak.emit(
                         PlayingAdBreak(
@@ -333,6 +336,7 @@ class AdPlaybackEventEmitterSpec : DescribeSpec({
                         duration = 10.0,
                         formattedDuration = "10",
                         trackingEvents = emptyList(),
+                        companionAds = emptyList(),
                     )
                     playingAdBreak.emit(
                         PlayingAdBreak(

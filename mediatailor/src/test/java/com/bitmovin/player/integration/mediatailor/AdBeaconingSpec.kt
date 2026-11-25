@@ -148,6 +148,7 @@ class AdBeaconingSpec : DescribeSpec({
                         beaconUrls = listOf("http://example.com/impression"),
                     ),
                 ),
+                companionAds = emptyList(),
             )
             val playingAdBreak = PlayingAdBreak(
                 adBreak = MediaTailorAdBreak(
@@ -286,6 +287,7 @@ class AdBeaconingSpec : DescribeSpec({
                         ),
                     ),
                 ),
+                companionAds = emptyList(),
             )
             val playingAdBreak = PlayingAdBreak(
                 adBreak = MediaTailorAdBreak(
@@ -410,6 +412,7 @@ class AdBeaconingSpec : DescribeSpec({
                         beaconUrls = listOf("http://example.com/fullscreenExit"),
                     ),
                 ),
+                companionAds = emptyList(),
             )
             val playingAdBreak = PlayingAdBreak(
                 adBreak = MediaTailorAdBreak(
