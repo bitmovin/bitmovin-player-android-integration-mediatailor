@@ -149,7 +149,7 @@ class AdsMapperSpec : DescribeSpec({
             .and {
                 get { first() }.and {
                     get { attributes.id } isEqualTo "companion1"
-                    get { iFrameResource } isEqualTo "iFrameResource"
+                    get { iFrameResource } isEqualTo "iFrameResourceUrl"
                     get { attributes.apiFramework } isEqualTo "brightline"
                     get { trackingEvents }.hasSize(0)
                 }

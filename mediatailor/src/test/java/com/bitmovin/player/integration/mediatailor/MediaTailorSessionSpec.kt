@@ -239,7 +239,32 @@ private val successfulTrackingResponse = """
           "durationInSeconds": 15.1,
           "startTime": "PT17.817798612S",
           "startTimeInSeconds": 17.817,
-          "companionAds": [],
+          "companionAds": [
+              {
+                "adParameters": null,
+                "altText": null,
+                "attributes": {
+                    "adSlotId": null,
+                    "id": "companion1",
+                    "apiFramework": "brightline",
+                    "height": "720",
+                    "width": "1080",
+                    "assetHeight": null,
+                    "assetWidth": null,
+                    "expandedHeight":null,
+                    "expandedWidth":null,
+                    "pxratio":null,
+                    "renderingMode":null
+                },
+                "trackingEvents": [],
+                "companionClickThrough": "clickThroughUrl",
+                "companionClickTracking": "clickTrackingUrl",
+                "htmlResource": "htmlResourceUrl",
+                "staticResource": "staticResourceUrl",
+                "iFrameResource": "iFrameResourceUrl",
+                "sequence": "1"
+              }
+          ],
           "trackingEvents": [
           {
               "beaconUrls": [
@@ -315,7 +340,7 @@ private val successfulTrackingResponse = """
       "durationInSeconds": 15.1,
       "adMarkerDuration": "PT15.100000078S",
       "startTime": "PT17.817798612S",
-      "startTimeInSeconds": 17.817,
+      "startTimeInSeconds": 17.817
     }
   ]
 }

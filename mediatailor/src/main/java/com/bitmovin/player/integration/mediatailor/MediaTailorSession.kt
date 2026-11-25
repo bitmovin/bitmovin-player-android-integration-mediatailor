@@ -1,5 +1,6 @@
 package com.bitmovin.player.integration.mediatailor
 
+import android.util.Log
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
@@ -117,6 +118,7 @@ internal class DefaultMediaTailorSession(
         val trackingUrl = trackingUrl ?: return
         val response = requestTrackingData(trackingUrl)
         _adBreaks.update { adsMapper.mapAdBreaks(response.avails) }
+
     }
 
     /**
