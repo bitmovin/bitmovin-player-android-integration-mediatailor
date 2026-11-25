@@ -37,8 +37,8 @@ internal class DefaultAdsMapper : AdsMapper {
                                 attributes = MediaTailorCompanionAttributes(
                                     id = companionAd.attributes.id,
                                     apiFramework = companionAd.attributes.apiFramework,
-                                    height = companionAd.attributes.height.toInt(),
-                                    width = companionAd.attributes.width.toInt()
+                                    height = companionAd.attributes.height?.toInt(),
+                                    width = companionAd.attributes.width?.toInt()
                                 ),
                                 companionClickThrough = companionAd.companionClickThrough,
                                 companionClickTracking = companionAd.companionClickTracking,

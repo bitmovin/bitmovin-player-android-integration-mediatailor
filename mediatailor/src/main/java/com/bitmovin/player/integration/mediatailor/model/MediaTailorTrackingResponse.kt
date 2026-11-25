@@ -60,7 +60,7 @@ internal data class CompanionTrackingEvent(
 @Serializable
 internal data class CompanionAttributes(
     val id: String,
-    val apiFramework: String,
-    val height: String,
-    val width: String,
+    val apiFramework: String?,
+    val height: String?,
+    val width: String?,
 )

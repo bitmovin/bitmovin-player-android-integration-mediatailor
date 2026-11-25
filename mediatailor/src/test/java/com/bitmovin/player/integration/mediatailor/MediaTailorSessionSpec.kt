@@ -251,10 +251,10 @@ private val successfulTrackingResponse = """
                     "width": "1080",
                     "assetHeight": null,
                     "assetWidth": null,
-                    "expandedHeight":null,
-                    "expandedWidth":null,
-                    "pxratio":null,
-                    "renderingMode":null
+                    "expandedHeight": null,
+                    "expandedWidth": null,
+                    "pxratio": null,
+                    "renderingMode": null
                 },
                 "trackingEvents": [],
                 "companionClickThrough": "clickThroughUrl",

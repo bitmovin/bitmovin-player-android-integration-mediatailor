@@ -152,9 +152,9 @@ public data class MediaTailorCompanionTrackingEvent(
 
 public data class MediaTailorCompanionAttributes(
     val id: String,
-    val apiFramework: String,
-    val height: Int,
-    val width: Int,
+    val apiFramework: String?,
+    val height: Int?,
+    val width: Int?,
 )
 
 public enum class MediaTailorCompanionResourceType {
