@@ -65,6 +65,7 @@ public data class MediaTailorLinearAd(
      */
     public val formattedDuration: String,
     public val trackingEvents: List<MediaTailorTrackingEvent>,
+    public val companionAds: List<MediaTailorCompanionAd>
 ) {
     /**
      * Ad click through url, if present.
@@ -107,3 +108,57 @@ public data class MediaTailorTrackingEvent(
      */
     public val beaconUrls: List<String>,
 )
+
+public data class MediaTailorCompanionAd(
+    val attributes: MediaTailorCompanionAttributes,
+    val companionClickThrough: String?,
+    val companionClickTracking: String?,
+    val htmlResource: String?,
+    val iFrameResource: String?,
+    val staticResource: String?,
+    val trackingEvents: List<MediaTailorCompanionTrackingEvent>,
+) {
+    public fun getId(): String {
+        return attributes.id
+    }
+
+    public fun getResourceByType(type: MediaTailorCompanionResourceType): String? {
+        return when (type) {
+            MediaTailorCompanionResourceType.HTML -> htmlResource
+            MediaTailorCompanionResourceType.STATIC -> staticResource
+            MediaTailorCompanionResourceType.IFRAME -> iFrameResource
+        }
+    }
+
+    public fun getAvailableResourceTypes(): List<MediaTailorCompanionResourceType> {
+        val types: MutableList<MediaTailorCompanionResourceType> = mutableListOf()
+        htmlResource?.let {
+            types.add(MediaTailorCompanionResourceType.HTML)
+        }
+        staticResource?.let {
+            types.add(MediaTailorCompanionResourceType.STATIC)
+        }
+        iFrameResource?.let {
+            types.add(MediaTailorCompanionResourceType.IFRAME)
+        }
+        return types
+    }
+}
+
+public data class MediaTailorCompanionTrackingEvent(
+    val event: String,
+    val uri: String,
+)
+
+public data class MediaTailorCompanionAttributes(
+    val id: String,
+    val apiFramework: String?,
+    val height: Int?,
+    val width: Int?,
+)
+
+public enum class MediaTailorCompanionResourceType {
+    HTML,
+    STATIC,
+    IFRAME,
+}

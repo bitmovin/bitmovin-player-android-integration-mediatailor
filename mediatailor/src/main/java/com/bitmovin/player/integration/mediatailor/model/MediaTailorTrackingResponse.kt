@@ -26,6 +26,7 @@ internal data class Ad(
     val startTime: String,
     val startTimeInSeconds: Double,
     val trackingEvents: List<TrackingEvent>,
+    val companionAds: List<CompanionAd>,
 )
 
 @Serializable
@@ -37,4 +38,29 @@ internal data class TrackingEvent(
     val eventType: String,
     val startTime: String,
     val startTimeInSeconds: Double,
+)
+
+@Serializable
+internal data class CompanionAd(
+    val attributes: CompanionAttributes,
+    val companionClickThrough: String?,
+    val companionClickTracking: String?,
+    val htmlResource: String?,
+    val iFrameResource: String?,
+    val staticResource: String?,
+    val trackingEvents: List<CompanionTrackingEvent>,
+)
+
+@Serializable
+internal data class CompanionTrackingEvent(
+    val event: String,
+    val uri: String,
+)
+
+@Serializable
+internal data class CompanionAttributes(
+    val id: String,
+    val apiFramework: String?,
+    val height: String?,
+    val width: String?,
 )

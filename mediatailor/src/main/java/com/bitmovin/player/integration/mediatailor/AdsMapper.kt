@@ -1,6 +1,9 @@
 package com.bitmovin.player.integration.mediatailor
 
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorCompanionAd
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorCompanionAttributes
+import com.bitmovin.player.integration.mediatailor.api.MediaTailorCompanionTrackingEvent
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorLinearAd
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorTrackingEvent
 import com.bitmovin.player.integration.mediatailor.model.Avail
@@ -29,6 +32,27 @@ internal class DefaultAdsMapper : AdsMapper {
                                 beaconUrls = trackingEvent.beaconUrls,
                             )
                         },
+                        companionAds = ad.companionAds.map { companionAd ->
+                            MediaTailorCompanionAd(
+                                attributes = MediaTailorCompanionAttributes(
+                                    id = companionAd.attributes.id,
+                                    apiFramework = companionAd.attributes.apiFramework,
+                                    height = companionAd.attributes.height?.toInt(),
+                                    width = companionAd.attributes.width?.toInt()
+                                ),
+                                companionClickThrough = companionAd.companionClickThrough,
+                                companionClickTracking = companionAd.companionClickTracking,
+                                htmlResource = companionAd.htmlResource,
+                                iFrameResource = companionAd.iFrameResource,
+                                staticResource = companionAd.staticResource,
+                                trackingEvents = companionAd.trackingEvents.map { trackingEvent ->
+                                    MediaTailorCompanionTrackingEvent(
+                                        event = trackingEvent.event,
+                                        uri = trackingEvent.uri,
+                                    )
+                                }
+                            )
+                        }
                     )
                 },
                 scheduleTime = avail.startTimeInSeconds,

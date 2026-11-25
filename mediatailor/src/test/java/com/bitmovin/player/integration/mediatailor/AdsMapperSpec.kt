@@ -3,6 +3,8 @@ package com.bitmovin.player.integration.mediatailor
 import com.bitmovin.player.integration.mediatailor.api.MediaTailorAdBreak
 import com.bitmovin.player.integration.mediatailor.model.Ad
 import com.bitmovin.player.integration.mediatailor.model.Avail
+import com.bitmovin.player.integration.mediatailor.model.CompanionAd
+import com.bitmovin.player.integration.mediatailor.model.CompanionAttributes
 import com.bitmovin.player.integration.mediatailor.model.TrackingEvent
 import io.kotest.core.spec.style.DescribeSpec
 import strikt.api.expectThat
@@ -35,6 +37,22 @@ class AdsMapperSpec : DescribeSpec({
                             duration = "durationEvent1",
                         ),
                     ),
+                    companionAds = listOf(
+                        CompanionAd(
+                            attributes = CompanionAttributes(
+                                id = "companion1",
+                                apiFramework = "brightline",
+                                height = "720",
+                                width = "1080",
+                            ),
+                            trackingEvents = emptyList(),
+                            companionClickThrough = "clickThroughUrl",
+                            companionClickTracking = "clickTrackingUrl",
+                            htmlResource = "htmlResourceUrl",
+                            staticResource = "staticResourceUrl",
+                            iFrameResource = "iFrameResourceUrl",
+                        )
+                    ),
                 ),
                 Ad(
                     adId = "ad2",
@@ -53,6 +71,7 @@ class AdsMapperSpec : DescribeSpec({
                             duration = "durationEvent2",
                         ),
                     ),
+                    companionAds = emptyList(),
                 ),
             ),
             duration = "duration1",
@@ -108,6 +127,7 @@ class AdsMapperSpec : DescribeSpec({
                     get { scheduleTime } isEqualTo 10.0
                     get { duration } isEqualTo 20.0
                     get { trackingEvents }.hasSize(1)
+                    get { companionAds }.hasSize(1)
                 }
             }
             .and {
@@ -116,6 +136,22 @@ class AdsMapperSpec : DescribeSpec({
                     get { scheduleTime } isEqualTo 40.0
                     get { duration } isEqualTo 15.0
                     get { trackingEvents }.hasSize(1)
+                    get { companionAds }.hasSize(0)
+                }
+            }
+    }
+
+    it("maps companion ads to media tailor companion ad") {
+        val adBreaks: List<MediaTailorAdBreak> = adsMapper.mapAdBreaks(avails)
+
+        expectThat(adBreaks.first().ads.first().companionAds)
+            .hasSize(1)
+            .and {
+                get { first() }.and {
+                    get { attributes.id } isEqualTo "companion1"
+                    get { iFrameResource } isEqualTo "iFrameResourceUrl"
+                    get { attributes.apiFramework } isEqualTo "brightline"
+                    get { trackingEvents }.hasSize(0)
                 }
             }
     }
