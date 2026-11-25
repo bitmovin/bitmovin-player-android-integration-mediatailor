@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-25
+
+### Added
+- List of `MediaTailorCompanionAd` to MediaTailorLinearAd
+
 ## [0.1.3] - 2025-12-17
 
 ### Fixed
